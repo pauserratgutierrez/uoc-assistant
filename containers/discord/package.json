@@ -1,0 +1,14 @@
+{
+  "name": "uoc_discord_bot",
+  "version": "1.0.0",
+  "description": "A Discord Bot front-end for the UOC AI Assistant",
+  "main": "src/shard.js",
+  "type": "module",
+  "scripts": {
+    "start": "node ."
+  },
+  "author": "Pau Serrat Gutiérrez",
+  "dependencies": {
+    "discord.js": "^14.18.0"
+  }
+}

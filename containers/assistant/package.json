@@ -1,0 +1,16 @@
+{
+  "name": "uoc_assistant",
+  "version": "1.0.0",
+  "description": "An OpenAI Assistant API for the UOC AI Assistant",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node ."
+  },
+  "author": "Pau Serrat Gutiérrez",
+  "dependencies": {
+    "express": "^4.21.2",
+    "mysql2": "^3.12.0",
+    "openai": "^4.85.4"
+  }
+}

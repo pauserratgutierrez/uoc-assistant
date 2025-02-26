@@ -1,0 +1,1 @@
+docker compose up --build --force-recreate uoc_assistant uoc_discord_bot
