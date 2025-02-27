@@ -1,7 +1,7 @@
 import { OpenAIWrapper } from './Wrapper.js'
 
 export class OpenAIVectorStoresFiles extends OpenAIWrapper {
-  static instance;
+  static instance
 
   constructor(apiKey) {
     if (OpenAIVectorStoresFiles.instance) return OpenAIVectorStoresFiles.instance

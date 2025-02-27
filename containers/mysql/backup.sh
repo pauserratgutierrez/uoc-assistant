@@ -9,6 +9,7 @@ BACKUP_FILE="$BACKUP_DIR/$MYSQL_DATABASE-$TIME.sql"
 echo "Starting backup for $MYSQL_DATABASE..."
 mysqldump -h $MYSQL_HOST -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE > "$BACKUP_FILE"
 
+# Check to see if the backup was successful
 if [ $? -eq 0 ]; then
   echo "Backup completed successfully: $BACKUP_FILE"
 else

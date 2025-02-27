@@ -1,7 +1,7 @@
 import { OpenAIWrapper } from './Wrapper.js'
 
 export class OpenAIAssistants extends OpenAIWrapper {
-  static instance;
+  static instance
 
   constructor(apiKey) {
     if (OpenAIAssistants.instance) return OpenAIAssistants.instance

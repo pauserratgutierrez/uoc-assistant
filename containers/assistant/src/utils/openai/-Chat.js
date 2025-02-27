@@ -1,7 +1,7 @@
 import { OpenAIWrapper } from './Wrapper.js'
 
 export class OpenAIChat extends OpenAIWrapper {
-  static instance;
+  static instance
 
   constructor(apiKey) {
     if (OpenAIChat.instance) return OpenAIChat.instance

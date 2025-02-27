@@ -1,5 +1,5 @@
 {
-  "name": "uoc_discord_bot",
+  "name": "uoc_discord",
   "version": "1.0.0",
   "description": "A Discord Bot front-end for the UOC AI Assistant",
   "main": "src/shard.js",

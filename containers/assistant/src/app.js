@@ -23,7 +23,7 @@ const DB_CREDENTIALS = {
   user: 'root',
   password: process.env.MYSQL_ROOT_PASSWORD,
   database: process.env.MYSQL_DATABASE,
-  port: process.env.MYSQL_PORT,
+  port: process.env.MYSQL_PORT
 }
 
 // OpenAI API
@@ -46,7 +46,7 @@ const assistantModel = new AssistantModel({
   assistantParams: CONFIG.ASSISTANTS.ASSISTANT.PARAMS,
   vectorStoreParams: CONFIG.ASSISTANTS.VECTOR_STORE.PARAMS,
   datasetGithub: CONFIG.DATASET.GITHUB,
-  datasetPath: CONFIG.DATASET.PATH,
+  datasetPath: CONFIG.DATASET.PATH
 })
 
 async function cleanup(DBInstance) {
@@ -82,5 +82,5 @@ server.use('/assistant', createAssistantRouter({ assistantModel }))
 // 404 Route
 server.use((req, res) => res.status(404).send({ error: 'Not Found' }))
 
-const PORT = process.env.PORT ?? 3000
+const PORT = process.env.ASSISTANT_API_PORT
 server.listen(PORT, () => console.log(`API Server running on port ${PORT}`))

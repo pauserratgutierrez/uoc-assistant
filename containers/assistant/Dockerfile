@@ -1,4 +1,4 @@
-# uoc_assistant
+# assistant
 
 FROM node:22.14-alpine
 WORKDIR /app

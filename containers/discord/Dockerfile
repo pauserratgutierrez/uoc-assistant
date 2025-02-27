@@ -1,4 +1,4 @@
-# uoc_discord_bot
+# discord
 
 FROM node:22.14-alpine
 WORKDIR /app
