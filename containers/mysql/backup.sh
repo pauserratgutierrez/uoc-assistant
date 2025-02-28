@@ -1,8 +1,10 @@
+#!/bin/sh
+set -e
+
 # Backup directory structure
 DATE=$(date +"%d-%m-%Y")
 TIME=$(date +"%H-%M-%S")
 BACKUP_DIR="/backups/$DATE"
-mkdir -p "$BACKUP_DIR" # Create directory if it doesn't exist
 BACKUP_FILE="$BACKUP_DIR/$MYSQL_DATABASE-$TIME.sql"
 
 # Run the MySQL dump command

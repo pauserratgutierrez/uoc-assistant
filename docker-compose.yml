@@ -51,7 +51,8 @@ services:
       - network
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./containers/mysql/schema.sql:/docker-entrypoint-initdb.d/schema.sql # Initialize db schema on first run if data volume is empty
+      - ./backups:/backups
+      - ./containers/mysql/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro # Initialize db schema on first run if data volume is empty
     healthcheck:
       test: ["CMD-SHELL", "mysql --user=root --password=${MYSQL_ROOT_PASSWORD} --execute='USE ${MYSQL_DATABASE}; SELECT 1;'"]
       interval: 5m
@@ -59,23 +60,6 @@ services:
       start_interval: 5s
       retries: 3
       timeout: 2s
-
-  mysql_backup:
-    # image: ghcr.io/pauserratgutierrez/uoc-assistant/mysql:latest
-    build:
-      context: ./containers/mysql
-      dockerfile: Dockerfile
-    env_file:
-      - .env
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - network
-    entrypoint: /bin/sh -c "/etc/mysql/backup.sh"
-    volumes:
-      - ./backups:/backups
-    restart: no
 
 networks:
   network:

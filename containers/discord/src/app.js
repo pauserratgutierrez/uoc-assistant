@@ -1,7 +1,6 @@
 import { CONFIG } from './config.js'
 import { Client, Events, GatewayIntentBits } from 'discord.js'
 
-// Extract config.discord.channels.assistant
 const { ASSISTANT: ASSISTANT_CHANNEL_ID } = CONFIG.DISCORD.CHANNELS
 
 const client = new Client({

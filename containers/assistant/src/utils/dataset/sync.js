@@ -1,7 +1,5 @@
+import { toFile } from 'openai'
 import { GHContent, GHMetadata } from '../github/fetch.js'
-import fs from 'node:fs'
-import fsp from 'node:fs/promises'
-import path from 'node:path'
 
 // Helper to cleanup file from OpenAI and Vector Store (Modified, Deleted)
 async function cleanupFile(FilesInstance, VectorStoresFilesInstance, vectorStoreId, openaiId) {
@@ -19,31 +17,24 @@ async function cleanupFile(FilesInstance, VectorStoresFilesInstance, vectorStore
 }
 
 // Helper to write locally, upload to OpenAI and add to Vector Store (Added, Modified)
-async function processUpload(FilesInstance, VectorStoresFilesInstance, vectorStoreId, owner, repo, filePath, ref, datasetPath, name) {
+async function processUpload(FilesInstance, VectorStoresFilesInstance, vectorStoreId, owner, repo, filePath, ref, name) {
   const content = await GHContent(owner, repo, filePath, ref)
-  const localFilePath = path.join(datasetPath, name)
+  const fileObj = await toFile(Buffer.from(content), name)
 
-  await fsp.writeFile(localFilePath, JSON.stringify(content), 'utf-8')
+  const uploadedFile = await FilesInstance.uploadFile({
+    file: fileObj,
+    purpose: 'assistants'
+  })
+  console.log(' • Uploaded to OpenAI')
+  await VectorStoresFilesInstance.createVectorStoresFiles(vectorStoreId, {
+    file_id: uploadedFile.id
+  })
+  console.log(' • Added to Vector Store')
 
-  try {
-    const fileStream = fs.createReadStream(localFilePath)
-    const uploadedFile = await FilesInstance.uploadFile({
-      file: fileStream,
-      purpose: 'assistants'
-    })
-    console.log(' • Uploaded to OpenAI')
-    await VectorStoresFilesInstance.createVectorStoresFiles(vectorStoreId, {
-      file_id: uploadedFile.id
-    })
-    console.log(' • Added to Vector Store')
-  
-    return uploadedFile.id
-  } finally {
-    await fsp.unlink(localFilePath)
-  }
+  return uploadedFile.id
 }
 
-export async function sync(DBDatasetFilesClass, VectorStoresFilesInstance, FilesInstance, vectorStoreId, datasetGithub, datasetPath) {
+export async function sync(DBDatasetFilesClass, VectorStoresFilesInstance, FilesInstance, vectorStoreId, datasetGithub) {
   const { owner, repo, dirPath, ref } = datasetGithub
 
   const [ghFiles, dbFiles] = await Promise.all([
@@ -61,7 +52,7 @@ export async function sync(DBDatasetFilesClass, VectorStoresFilesInstance, Files
     // (Added) File exists in GitHub but doesn't exist in DB
     if (!dbFile) {
       console.log(`(+) File "${name}":`)
-      const openaiId = await processUpload(FilesInstance, VectorStoresFilesInstance, vectorStoreId, owner, repo, filePath, ref, datasetPath, name)
+      const openaiId = await processUpload(FilesInstance, VectorStoresFilesInstance, vectorStoreId, owner, repo, filePath, ref, name)
       await DBDatasetFilesClass.saveFileInfo(name, repo, dirPath, sha, openaiId)
 
     // (Unchanged) File exists in GitHub and exists in DB and hashes are identical
@@ -74,7 +65,7 @@ export async function sync(DBDatasetFilesClass, VectorStoresFilesInstance, Files
       console.log(`(!=) File "${name}":`)
       await cleanupFile(FilesInstance, VectorStoresFilesInstance, vectorStoreId, dbFile.openai_file_id)
       dbFilesMap.delete(name)
-      const openaiId = await processUpload(FilesInstance, VectorStoresFilesInstance, vectorStoreId, owner, repo, filePath, ref, datasetPath, name)
+      const openaiId = await processUpload(FilesInstance, VectorStoresFilesInstance, vectorStoreId, owner, repo, filePath, ref, name)
       await DBDatasetFilesClass.saveFileInfo(name, repo, dirPath, sha, openaiId)
     }
   }

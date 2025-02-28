@@ -17,7 +17,7 @@ Ets 'UOC Assistant', l'assistent d'IA de la UOC, Universitat Oberta de Catalunya
     VECTOR_STORE: {
       PARAMS: {
         name: 'UOC Assistant - Vector Store',
-        expires_after: { anchor: 'last_active_at', days: 3 },
+        expires_after: { anchor: 'last_active_at', days: 20 },
         chunking_strategy: { type: 'auto' },
         // chunking_strategy: {
         //   type: 'static',
@@ -28,7 +28,6 @@ Ets 'UOC Assistant', l'assistent d'IA de la UOC, Universitat Oberta de Catalunya
     },
   },
   DATASET: {
-    PATH: '/dataset', // Same as docker-compose.yml volume
     GITHUB: [
       {
         owner: 'codesnippetspro',

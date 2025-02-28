@@ -27,8 +27,20 @@ export async function GHContent(owner, repo, filePath, ref = 'main') {
 
     if (!response.ok) throw new Error(`GitHub API error: ${response.status} ${response.statusText}`)
 
-    const fileContent = await response.text()
-    return fileContent
+    const fileData = await response.json()
+    // If the file is large, GitHub won't include the content directly (fetch it using the download_url)
+    if (fileData.download_url) {
+      const contentResponse = await fetch(fileData.download_url, { headers })
+      if (!contentResponse.ok) throw new Error(`GitHub content download error: ${contentResponse.status} ${contentResponse.statusText}`)
+      return await contentResponse.text()
+    }
+
+    // Smaller files that have content directly in the API response
+    if (fileData.content && fileData.encoding === 'base64') {
+      return Buffer.from(fileData.content, 'base64').toString('utf-8')
+    }
+
+    throw new Error('Unable to retrieve file content')
   } catch (error) {
     throw error
   }

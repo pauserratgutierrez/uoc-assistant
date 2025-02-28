@@ -1,7 +1,7 @@
 import { sync } from '../utils/dataset/sync.js'
 
 export class AssistantModel {
-  constructor({ AssistantInstance, VectorStoresInstance, VectorStoresFilesInstance, FilesInstance, DBDatasetFilesClass, assistantParams, vectorStoreParams, datasetGithub, datasetPath }) {
+  constructor({ AssistantInstance, VectorStoresInstance, VectorStoresFilesInstance, FilesInstance, DBDatasetFilesClass, assistantParams, vectorStoreParams, datasetGithub }) {
     this.AssistantInstance = AssistantInstance
     this.VectorStoresInstance = VectorStoresInstance
     this.VectorStoresFilesInstance = VectorStoresFilesInstance
@@ -10,7 +10,6 @@ export class AssistantModel {
     this.assistantParams = assistantParams
     this.vectorStoreParams = vectorStoreParams
     this.datasetGithub = datasetGithub
-    this.datasetPath = datasetPath
   }
 
   async getAllAssistants() {
@@ -67,7 +66,7 @@ export class AssistantModel {
     console.log(`Syncing dataset for ${this.datasetGithub.length} repositories`)
 
     for (const i of this.datasetGithub) {
-      await sync(this.DBDatasetFilesClass, this.VectorStoresFilesInstance, this.FilesInstance, vectorStoreId, i, this.datasetPath)
+      await sync(this.DBDatasetFilesClass, this.VectorStoresFilesInstance, this.FilesInstance, vectorStoreId, i)
     }
 
     console.log('Sync complete')

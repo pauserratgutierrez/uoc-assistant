@@ -45,8 +45,7 @@ const assistantModel = new AssistantModel({
   DBDatasetFilesClass,
   assistantParams: CONFIG.ASSISTANTS.ASSISTANT.PARAMS,
   vectorStoreParams: CONFIG.ASSISTANTS.VECTOR_STORE.PARAMS,
-  datasetGithub: CONFIG.DATASET.GITHUB,
-  datasetPath: CONFIG.DATASET.PATH
+  datasetGithub: CONFIG.DATASET.GITHUB
 })
 
 async function cleanup(DBInstance) {

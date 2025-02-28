@@ -6,7 +6,6 @@ The project consists of several containerized services:
 - **assistant**: Built using Node.js, exposes an Express.js API server that interfaces with OpenAI API for AI processing and RAG functionality, as well as with the Database.
 - **discord**: Built using Node.js, provides a Discord bot service with interactive chat functionality as the user interface.
 - **mysql**: Database server for persistent storage of OpenAI, Discord and File data.
-- **mysql_backup**: On-demand database backup service.
 
 ## Key Features
 - **Instant Responses**: Provides real-time access to UOC information
@@ -50,19 +49,20 @@ This will:
 ### Database Backups
 Run an on-demand backup:
 ```
-docker compose run -rm mysql_backup
+# Make sure MySQL is running first
+docker compose up -d mysql
+# Then execute the backup script
+docker compose exec mysql /etc/mysql/backup.sh
 ```
 This will:
-- Start `mysql` if not running (waits for its healtcheck to pass).
-- Run the backup process and store the result in `./backups/[DATE]/[DATABASE]-[TIME].sql`
-- Automatically exit when complete.
+- Store the backup in `./backups/[DATE]/[DATABASE]-[TIME].sql`
 
 ### Viewing Logs
 ```
 docker compose logs -f
 docker compose logs -f <service_name>
 ```
-Service name can be: `assistant`, `discord`, `mysql`, `mysql_backup`
+Service name can be: `assistant`, `discord`, `mysql`
 
 ## Project Structure
 ```
