@@ -1,42 +1,5 @@
 services:
 
-  assistant:
-    # image: ghcr.io/pauserratgutierrez/uoc-assistant/assistant:latest
-    build:
-      context: ./containers/assistant
-      dockerfile: Dockerfile
-    restart: on-failure
-    env_file:
-      - .env
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - network
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health/status"]
-      interval: 5m # Periodically check once healthy
-      start_period: 10s # Delay 30 seconds to let MySQL initialize
-      start_interval: 5s # Periodically check during the start period
-      retries: 2 # Marked as unhealthy after consecutive failures
-      timeout: 2s # Total time for each check
-
-  discord:
-    # image: ghcr.io/pauserratgutierrez/uoc-assistant/discord:latest
-    build:
-      context: ./containers/discord
-      dockerfile: Dockerfile
-    restart: on-failure:3
-    env_file:
-      - .env
-    depends_on:
-      mysql:
-        condition: service_healthy
-      assistant:
-        condition: service_healthy
-    networks:
-      - network
-
   mysql:
     # image: ghcr.io/pauserratgutierrez/uoc-assistant/mysql:latest
     build:
@@ -55,11 +18,48 @@ services:
       - ./containers/mysql/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro # Initialize db schema on first run if data volume is empty
     healthcheck:
       test: ["CMD-SHELL", "mysql --user=root --password=${MYSQL_ROOT_PASSWORD} --execute='USE ${MYSQL_DATABASE}; SELECT 1;'"]
+      interval: 5m # Periodically check once healthy
+      start_period: 30s # Delay 30 seconds to let MySQL initialize
+      start_interval: 5s # Periodically check during the start period
+      retries: 3 # Marked as unhealthy after consecutive failures
+      timeout: 2s # Total time for each check
+
+  assistant:
+    # image: ghcr.io/pauserratgutierrez/uoc-assistant/assistant:latest
+    build:
+      context: ./containers/assistant
+      dockerfile: Dockerfile
+    restart: on-failure
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health/status"]
       interval: 5m
-      start_period: 30s
+      start_period: 10s
       start_interval: 5s
-      retries: 3
+      retries: 2
       timeout: 2s
+
+  discord:
+    # image: ghcr.io/pauserratgutierrez/uoc-assistant/discord:latest
+    build:
+      context: ./containers/discord
+      dockerfile: Dockerfile
+    restart: on-failure:3
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      assistant:
+        condition: service_healthy
+    networks:
+      - network
 
 networks:
   network:
