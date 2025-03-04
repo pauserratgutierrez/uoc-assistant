@@ -53,7 +53,7 @@ client.login()
     process.exit(1)
   })
 
-// const ASSISTANT_API_URL = `http://assistant:${process.env.ASSISTANT_API_PORT}`
+// const ASSISTANT_API_URL = `http://assistant:${process.env.ASSISTANT_PORT}`
 
 // console.log('Initializing assistant and syncing dataset...')
 

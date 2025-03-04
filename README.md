@@ -55,7 +55,7 @@ docker compose up -d mysql
 docker compose exec mysql /etc/mysql/backup.sh
 ```
 This will:
-- Store the backup in `./backups/[DATE]/[DATABASE]-[TIME].sql`
+- Store the backup in `./backups/[DATE]/[DATABASE]-[TIME].sql.gz`
 
 ### Viewing Logs
 ```

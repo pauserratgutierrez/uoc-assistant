@@ -7,8 +7,9 @@ import { OpenAIVectorStores } from './utils/openai/VectorStores.js'
 import { OpenAIVectorStoresFiles } from './utils/openai/VectorStoresFiles.js'
 import { OpenAIFiles } from './utils/openai/Files.js'
 
-import { DBWrapper } from './utils/database/Wrapper.js'
-import { DBDatasetFiles } from './utils/database/DatasetFiles.js'
+import { DBService } from './utils/db/Service.js'
+import { Schema } from './utils/db/Schema.js'
+import { DBDatasetFiles } from './utils/db/DatasetFiles.js'
 
 import { createAssistantRouter } from './routes/assistant.js'
 import { createHealthRouter } from './routes/health.js'
@@ -18,14 +19,6 @@ import { AssistantModel } from './models/assistant.js'
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 if (!OPENAI_API_KEY) throw new Error('OpenAI API key is required.')
 
-const DB_CREDENTIALS = {
-  host: process.env.MYSQL_HOST,
-  user: 'root',
-  password: process.env.MYSQL_ROOT_PASSWORD,
-  database: process.env.MYSQL_DATABASE,
-  port: process.env.MYSQL_PORT
-}
-
 // OpenAI API
 const AssistantInstance = OpenAIAssistants.getInstance(OPENAI_API_KEY)
 const VectorStoresInstance = OpenAIVectorStores.getInstance(OPENAI_API_KEY)
@@ -33,7 +26,16 @@ const VectorStoresFilesInstance = OpenAIVectorStoresFiles.getInstance(OPENAI_API
 const FilesInstance = OpenAIFiles.getInstance(OPENAI_API_KEY)
 
 // Database
-const DBInstance = DBWrapper.getInstance(DB_CREDENTIALS)
+const DBInstance = DBService.getInstance({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  port: process.env.DB_PORT
+})
+const schema = new Schema(DBInstance)
+await schema.initialize()
+
 const DBDatasetFilesClass = new DBDatasetFiles(DBInstance)
 
 // Initialize Models
@@ -81,5 +83,5 @@ server.use('/assistant', createAssistantRouter({ assistantModel }))
 // 404 Route
 server.use((req, res) => res.status(404).send({ error: 'Not Found' }))
 
-const PORT = process.env.ASSISTANT_API_PORT
+const PORT = process.env.ASSISTANT_PORT
 server.listen(PORT, () => console.log(`API Server running on port ${PORT}`))

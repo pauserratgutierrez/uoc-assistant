@@ -1,6 +1,6 @@
 export class DBDatasetFiles {
-  constructor(dbWrapper) {
-    this.db = dbWrapper
+  constructor(DBService) {
+    this.db = DBService
   }
 
   // Database queries for dataset_files table

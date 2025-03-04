@@ -1,9 +1,7 @@
 import { ShardingManager } from 'discord.js'
 
-const { DISCORD_CLIENT_SECRET: CLIENT_SECRET } = process.env
-
 const manager = new ShardingManager('./src/app.js', {
-  token: CLIENT_SECRET,
+  token: process.env.DISCORD_CLIENT_SECRET,
   totalShards: 'auto',
   shardList: 'auto',
   timeout: 30000,
