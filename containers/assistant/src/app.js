@@ -2,31 +2,31 @@ import express, { json } from 'express'
 
 import { CONFIG } from './config.js'
 
-import { OpenAIAssistants } from './utils/openai/Assistants.js'
-import { OpenAIVectorStores } from './utils/openai/VectorStores.js'
-import { OpenAIVectorStoresFiles } from './utils/openai/VectorStoresFiles.js'
-import { OpenAIFiles } from './utils/openai/Files.js'
+import { OpenAIClient } from './utils/openai/Client.js'
+import { OpenAIAssistants } from './utils/openai/managers/Assistants.js'
+import { OpenAIVectorStores } from './utils/openai/managers/VectorStores.js'
+import { OpenAIVectorStoresFiles } from './utils/openai/managers/VectorStoresFiles.js'
+import { OpenAIFiles } from './utils/openai/managers/Files.js'
 
-import { DBService } from './utils/db/Service.js'
+import { DBClient } from './utils/db/Client.js'
 import { Schema } from './utils/db/Schema.js'
-import { DBDatasetFiles } from './utils/db/DatasetFiles.js'
+import { DBDatasetFiles } from './utils/db/managers/DatasetFiles.js'
 
 import { createAssistantRouter } from './routes/assistant.js'
 import { createHealthRouter } from './routes/health.js'
 
 import { AssistantModel } from './models/assistant.js'
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY
-if (!OPENAI_API_KEY) throw new Error('OpenAI API key is required.')
+// OpenAI
+const aiClient = new OpenAIClient({ apiKey: process.env.OPENAI_API_KEY })
 
-// OpenAI API
-const AssistantInstance = OpenAIAssistants.getInstance(OPENAI_API_KEY)
-const VectorStoresInstance = OpenAIVectorStores.getInstance(OPENAI_API_KEY)
-const VectorStoresFilesInstance = OpenAIVectorStoresFiles.getInstance(OPENAI_API_KEY)
-const FilesInstance = OpenAIFiles.getInstance(OPENAI_API_KEY)
+const assistantsManager = new OpenAIAssistants(aiClient)
+const vectorStoresManager = new OpenAIVectorStores(aiClient)
+const vectorStoresFilesManager = new OpenAIVectorStoresFiles(aiClient)
+const filesManager = new OpenAIFiles(aiClient)
 
 // Database
-const DBInstance = DBService.getInstance({
+const DBInstance = DBClient.getInstance({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -36,15 +36,15 @@ const DBInstance = DBService.getInstance({
 const schema = new Schema(DBInstance)
 await schema.initialize()
 
-const DBDatasetFilesClass = new DBDatasetFiles(DBInstance)
+const DBDatasetFilesManager = new DBDatasetFiles(DBInstance)
 
 // Initialize Models
 const assistantModel = new AssistantModel({
-  AssistantInstance,
-  VectorStoresInstance,
-  VectorStoresFilesInstance,
-  FilesInstance,
-  DBDatasetFilesClass,
+  assistantsManager,
+  vectorStoresManager,
+  vectorStoresFilesManager,
+  filesManager,
+  DBDatasetFilesManager,
   assistantParams: CONFIG.ASSISTANTS.ASSISTANT.PARAMS,
   vectorStoreParams: CONFIG.ASSISTANTS.VECTOR_STORE.PARAMS,
   datasetGithub: CONFIG.DATASET.GITHUB

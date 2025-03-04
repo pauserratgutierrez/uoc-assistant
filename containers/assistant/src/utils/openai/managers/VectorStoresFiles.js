@@ -1,17 +1,7 @@
-import { OpenAIWrapper } from './Wrapper.js'
-
-export class OpenAIVectorStoresFiles extends OpenAIWrapper {
-  static instance
-
-  constructor(apiKey) {
-    if (OpenAIVectorStoresFiles.instance) return OpenAIVectorStoresFiles.instance
-    super(apiKey)
-    OpenAIVectorStoresFiles.instance = this
-  }
-
-  static getInstance(apiKey) {
-    if (!OpenAIVectorStoresFiles.instance) OpenAIVectorStoresFiles.instance = new OpenAIVectorStoresFiles(apiKey)
-    return OpenAIVectorStoresFiles.instance
+export class OpenAIVectorStoresFiles {
+  constructor(openai) {
+    if (!openai) throw new Error('OpenAI Client is required')
+    this.openai = openai
   }
 
   /**

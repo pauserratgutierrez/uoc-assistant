@@ -53,18 +53,14 @@ client.login()
     process.exit(1)
   })
 
-// const ASSISTANT_API_URL = `http://assistant:${process.env.ASSISTANT_PORT}`
+// const ASSISTANT_URL = `http://assistant:${process.env.ASSISTANT_PORT}`
 
-// console.log('Initializing assistant and syncing dataset...')
-
-// const response = await fetch(`${ASSISTANT_API_URL}/assistant/init`, { method: 'GET' })
+// const response = await fetch(`${ASSISTANT_URL}/assistant/init`, { method: 'GET' })
 // const body = await response.json()
 // const { vectorStoreId } = body.data
 
-// await fetch(`${ASSISTANT_API_URL}/assistant/sync-dataset`, {
+// await fetch(`${ASSISTANT_URL}/assistant/sync-dataset`, {
 //   method: 'POST',
 //   headers: { 'Content-Type': 'application/json' },
 //   body: JSON.stringify({ vectorStoreId }),
 // })
-
-// console.log('Assistant initialized and dataset synced.')

@@ -9,6 +9,7 @@ export class Schema {
     await this.createDatasetFilesTable()
     await this.createDiscordUsersTable()
     await this.createDiscordAiThreadsTable()
+    await this.createAiUsageTable()
   }
 
   async createDatasetFilesTable() {
@@ -23,7 +24,7 @@ export class Schema {
         PRIMARY KEY (gh_file_name, gh_file_dir_path, gh_repo)
       )
     `
-    return await this.#db.query(sql)
+    return await this.#db.rawQuery(sql)
   }
 
   async createDiscordUsersTable() {
@@ -34,7 +35,7 @@ export class Schema {
         join_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `
-    return await this.#db.query(sql)
+    return await this.#db.rawQuery(sql)
   }
 
   async createDiscordAiThreadsTable() {
@@ -48,6 +49,22 @@ export class Schema {
         CONSTRAINT uc_discord_users_threads UNIQUE (user_id, discord_thread_id)
       )
     `
-    return await this.#db.query(sql)
+    return await this.#db.rawQuery(sql)
+  }
+
+  async createAiUsageTable() {
+    const sql = `
+      CREATE TABLE IF NOT EXISTS ai_usage (
+        user_id INT NOT NULL,
+        model VARCHAR(50) NOT NULL,
+        prompt_token_cost INT NOT NULL,
+        completion_token_cost INT NOT NULL,
+        prompt_tokens INT NOT NULL,
+        completion_tokens INT NOT NULL,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES discord_users(id) ON DELETE CASCADE
+      )
+    `
+    return await this.#db.rawQuery(sql)
   }
 }

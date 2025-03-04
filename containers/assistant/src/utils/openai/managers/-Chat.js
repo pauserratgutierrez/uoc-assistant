@@ -1,17 +1,7 @@
-import { OpenAIWrapper } from './Wrapper.js'
-
-export class OpenAIChat extends OpenAIWrapper {
-  static instance
-
-  constructor(apiKey) {
-    if (OpenAIChat.instance) return OpenAIChat.instance
-    super(apiKey)
-    OpenAIChat.instance = this
-  }
-
-  static getInstance(apiKey) {
-    if (!OpenAIChat.instance) OpenAIChat.instance = new OpenAIChat(apiKey)
-    return OpenAIChat.instance
+export class OpenAIChat {
+  constructor(openai) {
+    if (!openai) throw new Error('OpenAI Client is required')
+    this.openai = openai
   }
 
   /**

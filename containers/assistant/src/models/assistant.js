@@ -1,12 +1,12 @@
 import { sync } from '../utils/dataset/sync.js'
 
 export class AssistantModel {
-  constructor({ AssistantInstance, VectorStoresInstance, VectorStoresFilesInstance, FilesInstance, DBDatasetFilesClass, assistantParams, vectorStoreParams, datasetGithub }) {
-    this.AssistantInstance = AssistantInstance
-    this.VectorStoresInstance = VectorStoresInstance
-    this.VectorStoresFilesInstance = VectorStoresFilesInstance
-    this.FilesInstance = FilesInstance
-    this.DBDatasetFilesClass = DBDatasetFilesClass
+  constructor({ assistantsManager, vectorStoresManager, vectorStoresFilesManager, filesManager, DBDatasetFilesManager, assistantParams, vectorStoreParams, datasetGithub }) {
+    this.assistantsManager = assistantsManager
+    this.vectorStoresManager = vectorStoresManager
+    this.vectorStoresFilesManager = vectorStoresFilesManager
+    this.filesManager = filesManager
+    this.DBDatasetFilesManager = DBDatasetFilesManager
     this.assistantParams = assistantParams
     this.vectorStoreParams = vectorStoreParams
     this.datasetGithub = datasetGithub
@@ -16,7 +16,7 @@ export class AssistantModel {
     const assistants = []
     let after = null
     while (true) {
-      const { data } = await this.AssistantInstance.listAssistants({ limit: 100, after })
+      const { data } = await this.assistantsManager.listAssistants({ limit: 100, after })
       if (!data || data.length === 0) break
       assistants.push(...data)
       after = data[data.length - 1].id
@@ -32,10 +32,10 @@ export class AssistantModel {
       // Create or update
       let assistant = assistants.find(a => a?.metadata?.[assistantMK] === assistantMV)
       if (assistant) {
-        assistant = await this.AssistantInstance.updateAssistant(assistant.id, this.assistantParams)
+        assistant = await this.assistantsManager.updateAssistant(assistant.id, this.assistantParams)
         console.log(`(=) Assistant "${assistant.name}" (ID: ${assistant.id}) found`)
       } else {
-        assistant = await this.AssistantInstance.createAssistant(this.assistantParams)
+        assistant = await this.assistantsManager.createAssistant(this.assistantParams)
         console.log(`(+) Assistant "${assistant.name}" (ID: ${assistant.id}) created`)
       }
 
@@ -43,11 +43,11 @@ export class AssistantModel {
       const assistantVSIds = assistant.tool_resources?.file_search?.vector_store_ids
       let VS
       if (assistantVSIds && assistantVSIds.length > 0) {
-        VS = await this.VectorStoresInstance.updateVectorStore(assistantVSIds[0], this.vectorStoreParams)
+        VS = await this.vectorStoresManager.updateVectorStore(assistantVSIds[0], this.vectorStoreParams)
         console.log(`(=) Vector Store "${VS.name}" (ID: ${VS.id}) found is already assigned to Assistant "${assistant.name}" (ID: ${assistant.id})`)
       } else {
-        VS = await this.VectorStoresInstance.createVectorStore(this.vectorStoreParams)
-        await this.AssistantInstance.updateAssistant(assistant.id, {
+        VS = await this.vectorStoresManager.createVectorStore(this.vectorStoreParams)
+        await this.assistantsManager.updateAssistant(assistant.id, {
           tool_resources: { file_search: { vector_store_ids: [VS.id] } }
         })
         console.log(`(+) Vector Store "${VS.name}" (ID: ${VS.id}) created and assigned to Assistant "${assistant.name}" (ID: ${assistant.id})`)
@@ -66,7 +66,7 @@ export class AssistantModel {
     console.log(`Syncing dataset for ${this.datasetGithub.length} repositories`)
 
     for (const i of this.datasetGithub) {
-      await sync(this.DBDatasetFilesClass, this.VectorStoresFilesInstance, this.FilesInstance, vectorStoreId, i)
+      await sync(this.DBDatasetFilesManager, this.vectorStoresFilesManager, this.filesManager, vectorStoreId, i)
     }
 
     console.log('Sync complete')

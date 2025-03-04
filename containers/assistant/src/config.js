@@ -5,8 +5,8 @@ export const CONFIG = {
         model: 'gpt-4o-mini',
         name: 'UOC Assistant',
         description: "Assistent d'IA de la UOC",
-        instructions:`
-Ets 'UOC Assistant', l'assistent d'IA de la UOC, Universitat Oberta de Catalunya. La teva missió és respondre a les preguntes dels estudiants, professors o altres usuaris de la UOC.`,
+        instructions:
+`Ets 'UOC Assistant', l'assistent d'IA de la UOC, Universitat Oberta de Catalunya. La teva missió és respondre a les preguntes dels estudiants, professors o altres usuaris de la UOC.`,
         tools: [ { type: 'file_search' } ],
         metadata: { custom_tag: 'uoc_assistant' }, // Lookup purposes, do not change!
         temperature: 0.5,

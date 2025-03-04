@@ -38,8 +38,8 @@ cp .env.example .env
 ### Production Mode
 Start the complete application stack:
 ```
-docker compose up -d discord
-docker compose up --build --force-recreate assistant discord
+docker compose up -d
+docker compose up --build --force-recreate
 ```
 This will:
 - Start `mysql` (waits for its healtcheck to pass).
