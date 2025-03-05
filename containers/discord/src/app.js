@@ -1,7 +1,15 @@
 import { CONFIG } from './config.js'
 import { Client, Events, GatewayIntentBits } from 'discord.js'
-
-const { ASSISTANT: ASSISTANT_CHANNEL_ID } = CONFIG.DISCORD.CHANNELS
+import { assistantChannelSetup } from './utils/channelSetup.js'
+import { initAssistant } from './utils/assistant/init.js'
+import { syncDataset } from './utils/assistant/syncDataset.js'
+import { buttonChatNew } from './utils/newChat.js'
+import { modalChatNew } from './utils/newChat.js'
+  
+const ASSISTANT_URL = `http://assistant:${process.env.ASSISTANT_PORT}`
+const { ASSISTANT: assistantChannelId } = CONFIG.DISCORD.CHANNELS
+const { NAME: assistantName, FOOTER: assistantFooter } = CONFIG.ASSISTANT
+const { CORPORATIVE: colorCorp, MASTERBRAND: colorBrand } = CONFIG.COLORS
 
 const client = new Client({
   intents: [
@@ -15,6 +23,11 @@ const client = new Client({
 client.once(Events.ClientReady, async (readyClient) => {
   const { username, id } = readyClient.user
 
+  const vectorStoreId = await initAssistant(ASSISTANT_URL)
+  await syncDataset(ASSISTANT_URL, vectorStoreId)
+
+  await assistantChannelSetup(client, assistantChannelId, assistantName, assistantFooter, colorBrand)
+
   console.log(`Started ${username} #${id} at ${new Date().toLocaleString()}`)
 })
 
@@ -23,7 +36,7 @@ client.on(Events.MessageCreate, async (message) => {
   const { parentId, ownerId } = message.channel
 
   if (bot) return
-  if (message.channel.isThread() && parentId === ASSISTANT_CHANNEL_ID && ownerId === client.user.id) {
+  if (message.channel.isThread() && parentId === assistantChannelId && ownerId === client.user.id) {
     // Generate AI response
   }
 })
@@ -32,18 +45,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
   const { customId: id } = interaction
 
   if (interaction.isButton()) {
-    if (id === 'button_chat_new') {
-      // Button new chat action
-    }
+    if (id === 'button_chat_new') await buttonChatNew(interaction)
     if (id === 'button_chat_end') {
       // Button end chat action
     }
   }
 
   if (interaction.isModalSubmit()) {
-    if (id === 'modal_chat_new') {
-      // Modal new chat action
-    }
+    if (id === 'modal_chat_new') await modalChatNew(interaction, assistantFooter, colorBrand)
   }
 })
 
@@ -52,15 +61,3 @@ client.login()
     console.error('Failed to login:', error)
     process.exit(1)
   })
-
-// const ASSISTANT_URL = `http://assistant:${process.env.ASSISTANT_PORT}`
-
-// const response = await fetch(`${ASSISTANT_URL}/assistant/init`, { method: 'GET' })
-// const body = await response.json()
-// const { vectorStoreId } = body.data
-
-// await fetch(`${ASSISTANT_URL}/assistant/sync-dataset`, {
-//   method: 'POST',
-//   headers: { 'Content-Type': 'application/json' },
-//   body: JSON.stringify({ vectorStoreId }),
-// })

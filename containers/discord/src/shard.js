@@ -34,22 +34,22 @@ manager.on('shardCreate', (shard) => {
   shardEvents(shard)
 })
 
-// Status reporting function (useful for monitoring)
-async function reportStatus() {
-  try {
-    const shardGuildCounts = await manager.fetchClientValues('guilds.cache.size')
-    const totalGuilds = shardGuildCounts.reduce((acc, count) => acc + count, 0)
+// // Status reporting function (useful for monitoring)
+// async function reportStatus() {
+//   try {
+//     const shardGuildCounts = await manager.fetchClientValues('guilds.cache.size')
+//     const totalGuilds = shardGuildCounts.reduce((acc, count) => acc + count, 0)
     
-    const memberCounts = await manager.broadcastEval(c => 
-      c.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0)
-    )
-    const totalMembers = memberCounts.reduce((acc, count) => acc + count, 0)
+//     const memberCounts = await manager.broadcastEval(c => 
+//       c.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0)
+//     )
+//     const totalMembers = memberCounts.reduce((acc, count) => acc + count, 0)
     
-    console.log(`Status: ${manager.shards.size} shards, ${totalGuilds} guilds, approximately ${totalMembers} members`)
-  } catch (error) {
-    console.error('Error generating status report:', error)
-  }
-}
+//     console.log(`Status: ${manager.shards.size} shards, ${totalGuilds} guilds, approximately ${totalMembers} members`)
+//   } catch (error) {
+//     console.error('Error generating status report:', error)
+//   }
+// }
 
 async function startBot() {
   try {
@@ -70,13 +70,13 @@ async function startBot() {
       })
     })
 
-    // Initial status report
-    setTimeout(async () => {
-      await reportStatus()
+    // // Initial status report
+    // setTimeout(async () => {
+    //   await reportStatus()
 
-      // Periodic status report
-      setInterval(reportStatus, 60 * 60 * 1000) // Hourly
-    }, 10000) // 10 seconds
+    //   // Periodic status report
+    //   setInterval(reportStatus, 60 * 60 * 1000) // Hourly
+    // }, 10000) // 10 seconds
 
   } catch (error) {
     if (error.status === 429) {
