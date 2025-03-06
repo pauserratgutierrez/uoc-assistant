@@ -61,7 +61,7 @@ docker compose build --no-cache
 ```
 
 ### MySQL Scripts
-Backup (Stored in ./containers/mysql/backups/[DATE]/[DATABASE]-[TIME].sql.gz)
+Do a Backup (Stored in `./containers/mysql/backups/[DATE]/[DATABASE]-[TIME].sql.gz`)
 ```
 docker compose exec mysql /etc/mysql/backup.sh
 ```
