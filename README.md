@@ -39,12 +39,8 @@ The project consists of several containerized services:
 7. GitHub Repository for the Dataset (GH Personal Access Token)
 
 ### Configuration
-```
-cp .env.example .env # Copy .env.example file
-```
-```
-nano .env # Populate .env
-```
+`cp .env.example .env # Copy .env.example file`
+`nano .env # Populate .env`
 
 ## Running the Application
 ### Develop
