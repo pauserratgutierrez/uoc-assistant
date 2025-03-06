@@ -54,6 +54,9 @@ nano .env
 docker image prune -all
 docker builder prune
 docker compose build --no-cache
+```
+
+```
 # Run
 docker compose up -d
 ```
