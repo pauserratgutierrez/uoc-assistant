@@ -49,34 +49,31 @@ nano .env
 ```
 
 ## Running the Application
+- Management
 ```
-# Manage
 docker image prune -all
 docker builder prune
 docker compose build --no-cache
 ```
-
+- Start the chain of services in the following order: `mysql`, `assistant` and `discord`.
 ```
-# Run
 docker compose up -d
 ```
-1. Start `mysql` (waits for its healtcheck to pass).
-2. Start `assistant` (waits for its healtcheck to pass).
-3. Starts `discord`.
 
 ### MySQL Scripts
+- Backup (Stored in ./containers/mysql/backups/[DATE]/[DATABASE]-[TIME].sql.gz)
 ```
-# Do a Backup
-# Stored in ./containers/mysql/backups/[DATE]/[DATABASE]-[TIME].sql.gz
 docker compose exec mysql /etc/mysql/backup.sh
-# Load a Backup
+```
+```
+- Load a Backup
 docker compose exec mysql /etc/mysql/restore.sh /backups/[DATE]/[DATABASE]-[TIME].sql.gz
 ```
 
 ### Viewing Logs
+- Service name can be: `mysql`, `assistant`, `discord`.
 ```
 docker compose logs -f <service_name>
-# assistant, discord or mysql
 ```
 
 ## Project Structure
