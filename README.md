@@ -49,24 +49,24 @@ nano .env
 ```
 
 ## Running the Application
-- Management
+Start the chain of services in the following order: `mysql`, `assistant` and `discord`.
+```
+docker compose up -d
+```
+Management
 ```
 docker image prune -all
 docker builder prune
 docker compose build --no-cache
 ```
-- Start the chain of services in the following order: `mysql`, `assistant` and `discord`.
-```
-docker compose up -d
-```
 
 ### MySQL Scripts
-- Backup (Stored in ./containers/mysql/backups/[DATE]/[DATABASE]-[TIME].sql.gz)
+Backup (Stored in ./containers/mysql/backups/[DATE]/[DATABASE]-[TIME].sql.gz)
 ```
 docker compose exec mysql /etc/mysql/backup.sh
 ```
+Load a Backup
 ```
-- Load a Backup
 docker compose exec mysql /etc/mysql/restore.sh /backups/[DATE]/[DATABASE]-[TIME].sql.gz
 ```
 
