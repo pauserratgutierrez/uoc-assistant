@@ -22,10 +22,12 @@ The project consists of several containerized services:
 ## Getting Started
 ### Prerequisites
 1. Install [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/)
-2. Get an [OpenAI API Key](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key) and setup [Prepaid Billing](https://help.openai.com/en/articles/8264644-how-can-i-set-up-prepaid-billing)
-3. Setup your Discord Account:
-- Create a [Discord Account](https://support.discord.com/hc/en-us/articles/360033931551)
-- Enable [Discord Dev Mode](https://help.mee6.xyz/support/solutions/articles/101000482629)
+2. Setup OpenAI:
+- Get an [API Key](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key)
+- Setup [Prepaid Billing](https://help.openai.com/en/articles/8264644-how-can-i-set-up-prepaid-billing)
+3. Setup a Discord Account:
+- [Create account](https://support.discord.com/hc/en-us/articles/360033931551)
+- Enable [Developer Mode](https://help.mee6.xyz/support/solutions/articles/101000482629)
 4. Create a [Discord Server](https://support.discord.com/hc/en-us/articles/204849977)
 5. Specific Discord Server Configuration:
 - Create a normal text channel for the AI Assistant (copy Channel ID)
@@ -38,10 +40,10 @@ The project consists of several containerized services:
 
 ### Configuration
 ```
-# Copy .env.example file
-cp .env.example .env
-# Populate .env
-nano .env
+cp .env.example .env # Copy .env.example file
+```
+```
+nano .env # Populate .env
 ```
 
 ## Running the Application
@@ -53,21 +55,17 @@ docker compose build --no-cache
 ```
 
 ### Production
-```
-docker compose up -d
-```
-1. Starts `mysql` (waits for its healtcheck to pass).
-2. Starts `assistant` (waits for its healtcheck to pass).
-3. Finally, starts `discord`.
+`docker compose up -d`
+1. Start `mysql` (waits for its healtcheck to pass).
+2. Start `assistant` (waits for its healtcheck to pass).
+3. Starts `discord`.
 
-### Database Backups
+### MySQL Scripts
 ```
-docker compose exec mysql /etc/mysql/backup.sh
+# Do a Backup
 # Stored in ./containers/mysql/backups/[DATE]/[DATABASE]-[TIME].sql.gz
-```
-
-### Database Restore
-```
+docker compose exec mysql /etc/mysql/backup.sh
+# Load a Backup
 docker compose exec mysql /etc/mysql/restore.sh /backups/[DATE]/[DATABASE]-[TIME].sql.gz
 ```
 
