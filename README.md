@@ -71,10 +71,10 @@ docker compose exec mysql /etc/mysql/restore.sh /backups/[DATE]/[DATABASE]-[TIME
 ```
 
 ### Viewing Logs
-- Service name can be: `mysql`, `assistant`, `discord`.
 ```
 docker compose logs -f <service_name>
 ```
+Service name can be: `mysql`, `assistant`, `discord`.
 
 ## Project Structure
 ```
