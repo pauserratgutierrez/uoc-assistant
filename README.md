@@ -44,18 +44,17 @@ The project consists of several containerized services:
 cp .env.example .env
 ```
 2. Populate it
-```nano .env```
+```
+nano .env
+```
 
 ## Running the Application
-### Develop
 ```
+# Manage
 docker image prune -all
 docker builder prune
 docker compose build --no-cache
-```
-
-### Production
-```
+# Run
 docker compose up -d
 ```
 1. Start `mysql` (waits for its healtcheck to pass).
