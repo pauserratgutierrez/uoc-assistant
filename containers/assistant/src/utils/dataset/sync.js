@@ -2,31 +2,31 @@ import { toFile } from 'openai'
 import { GHContent, GHMetadata } from '../github/fetch.js'
 
 // Helper to cleanup file from OpenAI and Vector Store (Modified, Deleted)
-async function cleanupFile(filesManager, vectorStoresFilesManager, vectorStoreId, openaiId) {
+async function cleanupFile(openaiM, vectorStoreId, openaiId) {
   if (!openaiId) return
-  const openaiFile = await filesManager.retrieveFile(openaiId)
+  const openaiFile = await openaiM.filesM.retrieveFile(openaiId)
   if (openaiFile) {
-    const vectorStoreFile = await vectorStoresFilesManager.retrieveVectorStoresFiles(vectorStoreId, openaiId)
+    const vectorStoreFile = await openaiM.vectorStoresFilesM.retrieveVectorStoresFiles(vectorStoreId, openaiId)
     if (vectorStoreFile) {
-      await vectorStoresFilesManager.deleteVectorStoresFiles(vectorStoreId, openaiId)
+      await openaiM.vectorStoresFilesM.deleteVectorStoresFiles(vectorStoreId, openaiId)
       console.log(` • Deleted from Vector Store.`)
     }
-    await filesManager.deleteFile(openaiId)
+    await openaiM.filesM.deleteFile(openaiId)
     console.log(` • Deleted from OpenAI.`)
   }
 }
 
-// Helper to write locally, upload to OpenAI and add to Vector Store (Added, Modified)
-async function processUpload(filesManager, vectorStoresFilesManager, vectorStoreId, owner, repo, filePath, ref, name) {
+// Helper to get file content, convert to file, upload to OpenAI and add to Vector Store (Added, Modified)
+async function processUpload(openaiM, vectorStoreId, owner, repo, filePath, ref, name) {
   const content = await GHContent(owner, repo, filePath, ref)
   const fileObj = await toFile(Buffer.from(content), name)
 
-  const uploadedFile = await filesManager.uploadFile({
+  const uploadedFile = await openaiM.filesM.uploadFile({
     file: fileObj,
     purpose: 'assistants'
   })
   console.log(' • Uploaded to OpenAI')
-  await vectorStoresFilesManager.createVectorStoresFiles(vectorStoreId, {
+  await openaiM.vectorStoresFilesM.createVectorStoresFiles(vectorStoreId, {
     file_id: uploadedFile.id
   })
   console.log(' • Added to Vector Store')
@@ -34,7 +34,7 @@ async function processUpload(filesManager, vectorStoresFilesManager, vectorStore
   return uploadedFile.id
 }
 
-export async function sync(DBInstance, vectorStoresFilesManager, filesManager, vectorStoreId, datasetGithub) {
+export async function sync(DBInstance, openaiM, vectorStoreId, datasetGithub) {
   const { owner, repo, dirPath, ref } = datasetGithub
 
   const [ghFiles, dbFiles] = await Promise.all([
@@ -52,7 +52,7 @@ export async function sync(DBInstance, vectorStoresFilesManager, filesManager, v
     // (Added) File exists in GitHub but doesn't exist in DB
     if (!dbFile) {
       console.log(`(+) File "${name}":`)
-      const openaiId = await processUpload(filesManager, vectorStoresFilesManager, vectorStoreId, owner, repo, filePath, ref, name)
+      const openaiId = await processUpload(openaiM, vectorStoreId, owner, repo, filePath, ref, name)
       await DBInstance.upsert('dataset_files', {
         gh_file_name: name,
         gh_repo: repo,
@@ -69,9 +69,9 @@ export async function sync(DBInstance, vectorStoresFilesManager, filesManager, v
     // (Modified) File exists in GitHub and exists DB but hashes are different
     } else {
       console.log(`(!=) File "${name}":`)
-      await cleanupFile(filesManager, vectorStoresFilesManager, vectorStoreId, dbFile.openai_file_id)
+      await cleanupFile(openaiM, vectorStoreId, dbFile.openai_file_id)
       dbFilesMap.delete(name)
-      const openaiId = await processUpload(filesManager, vectorStoresFilesManager, vectorStoreId, owner, repo, filePath, ref, name)
+      const openaiId = await processUpload(openaiM, vectorStoreId, owner, repo, filePath, ref, name)
       await DBInstance.upsert('dataset_files', {
         gh_file_name: name,
         gh_repo: repo,
@@ -85,7 +85,7 @@ export async function sync(DBInstance, vectorStoresFilesManager, filesManager, v
   // (Deleted) File doesn't exist in GitHub but exists in DB
   for (const [name, dbFile] of dbFilesMap) {
     console.log(`(-) File "${name}":`)
-    await cleanupFile(filesManager, vectorStoresFilesManager, vectorStoreId, dbFile.openai_file_id)
+    await cleanupFile(openaiM, vectorStoreId, dbFile.openai_file_id)
     DBInstance.delete('dataset_files', { gh_file_name: name, gh_repo: repo, gh_file_dir_path: dirPath })
   }
 }
@@ -95,6 +95,8 @@ export async function sync(DBInstance, vectorStoresFilesManager, filesManager, v
 //   gh_repo: repo,
 //   gh_file_dir_path: dirPath
 // }, '*')
+
+// If DB is empty, the Vector Store could still have files but we can't track them. Fetch all files from the Vector Store, delete them from OpenAI and the Vector Store. Then do the sync.
 
 // OpenAI Files can't have metadata, so I don't know the hash of the file itself.
 // GitHub files are the source of truth.

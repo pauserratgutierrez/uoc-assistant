@@ -1,18 +1,21 @@
 import { CONFIG } from './config.js'
+
 import { Client, Events, GatewayIntentBits } from 'discord.js'
+
+import { APIClient } from './utils/api/Client.js'
+
 import { assistantChannelSetup } from './utils/channelSetup.js'
-import { initAssistant } from './utils/assistant/init.js'
-import { syncDataset } from './utils/assistant/syncDataset.js'
 import { buttonChatNew } from './utils/newChat.js'
 import { modalChatNew } from './utils/newChat.js'
 
-import { getDiscordConfig } from './utils/discordConfig/getConfig.js'
-import { saveDiscordConfig } from './utils/discordConfig/saveConfig.js'
-
-const ASSISTANT_URL = `http://assistant:${process.env.ASSISTANT_PORT}`
-const { ASSISTANT: assistantChannelId } = CONFIG.DISCORD.CHANNELS
 const { NAME: assistantName, FOOTER: assistantFooter } = CONFIG.ASSISTANT
 const { CORPORATIVE: colorCorp, MASTERBRAND: colorBrand } = CONFIG.COLORS
+
+let assistantChannelId = null
+let assistantManagerRoleId = null
+
+// API
+const APIInstance = new APIClient()
 
 const client = new Client({
   intents: [
@@ -26,17 +29,16 @@ const client = new Client({
 client.once(Events.ClientReady, async (readyClient) => {
   const { username, id } = readyClient.user
 
-  const vectorStoreId = await initAssistant(ASSISTANT_URL)
-  await syncDataset(ASSISTANT_URL, vectorStoreId)
+  const vectorStoreId = await APIInstance.initialize()
+  await APIInstance.syncDataset(vectorStoreId)
 
-  // Get Discord configuration
-  const { channelId: existingChannelId, roleId: existingRoleId } = await getDiscordConfig(ASSISTANT_URL)
+  const discordConfigIds = await APIInstance.getDiscordConfigIds()
+  assistantChannelId = discordConfigIds.assistantChannelId
+  assistantManagerRoleId = discordConfigIds.assistantManagerRoleId
+
   const guild = client.guilds.cache.first()
 
-  let channelToUse = existingChannelId
-  let roleToUse = existingRoleId
-
-  if (!existingChannelId) {
+  if (!assistantChannelId) {
     console.log(`Creating a channel for the AI Assistant...`)
     const channel = await guild.channels.create({
       name: '✨ai-assistant',
@@ -45,21 +47,21 @@ client.once(Events.ClientReady, async (readyClient) => {
       permissionOverwrites: [
         {
           id: guild.id,
-          allow: ['ViewChannel', 'ReadMessageHistory'],
-          deny: ['SendMessages']
+          allow: ['ViewChannel', 'SendMessagesInThreads', 'ReadMessageHistory'],
+          deny: ['SendMessages', 'CreatePublicThreads', 'CreatePrivateThreads', 'AddReactions', 'SendTTSMessages', 'SendVoiceMessages', 'SendPolls', 'UseApplicationCommands', 'UseExternalApps']
         }
       ]
     })
-    channelToUse = channel.id
+    assistantChannelId = channel.id
   }
 
-  if (!existingRoleId) {
+  if (!assistantManagerRoleId) {
     console.log(`Creating a role for the Assistant Manager...`)
     const role = await guild.roles.create({ name: 'Assistant Manager', color: colorBrand })
-    roleToUse = role.id
+    assistantManagerRoleId = role.id
   }
 
-  await saveDiscordConfig(ASSISTANT_URL, channelToUse, roleToUse)
+  await APIInstance.saveDiscordConfigIds(assistantChannelId, assistantManagerRoleId)
 
   await assistantChannelSetup(client, assistantChannelId, assistantName, assistantFooter, colorBrand)
 

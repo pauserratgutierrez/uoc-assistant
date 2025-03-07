@@ -1,12 +1,7 @@
 export const CONFIG = {
-  DISCORD: {
-    CHANNELS: {
-      ASSISTANT: '1344713845524135999'
-    }
-  },
   ASSISTANT: {
     NAME: 'UOC Assistant',
-    FOOTER: '✨ UOC Assistant'
+    FOOTER: '✨ Powered by AI'
   },
   COLORS: {
     CORPORATIVE: '#000078',

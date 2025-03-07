@@ -1,4 +1,4 @@
-export class DiscordConfigModel {
+export class DiscordModel {
   #db
 
   constructor({ DBInstance }) {

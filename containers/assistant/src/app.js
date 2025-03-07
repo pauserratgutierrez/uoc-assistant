@@ -3,28 +3,18 @@ import express, { json } from 'express'
 import { CONFIG } from './config.js'
 
 import { OpenAIClient } from './utils/openai/Client.js'
-import { OpenAIAssistants } from './utils/openai/managers/Assistants.js'
-import { OpenAIVectorStores } from './utils/openai/managers/VectorStores.js'
-import { OpenAIVectorStoresFiles } from './utils/openai/managers/VectorStoresFiles.js'
-import { OpenAIFiles } from './utils/openai/managers/Files.js'
-
 import { DBClient } from './utils/db/Client.js'
 import { Schema } from './utils/db/Schema.js'
 
 import { createHealthRouter } from './routes/health.js'
 import { createAssistantRouter } from './routes/assistant.js'
-import { createDiscordConfigRouter } from './routes/discordConfig.js'
+import { createDiscordRouter } from './routes/discord.js'
 
 import { AssistantModel } from './models/assistant.js'
-import { DiscordConfigModel } from './models/discordConfig.js'
+import { DiscordModel } from './models/discord.js'
 
-// OpenAI
-const aiClient = new OpenAIClient({ apiKey: process.env.OPENAI_API_KEY })
-
-const assistantsManager = new OpenAIAssistants(aiClient)
-const vectorStoresManager = new OpenAIVectorStores(aiClient)
-const vectorStoresFilesManager = new OpenAIVectorStoresFiles(aiClient)
-const filesManager = new OpenAIFiles(aiClient)
+// OpenAI - Single client with all managers
+const OpenAIInstance = new OpenAIClient({ apiKey: process.env.OPENAI_API_KEY })
 
 // Database
 const DBInstance = DBClient.getInstance({
@@ -40,16 +30,13 @@ await schema.initialize()
 // Initialize Models
 const assistantModel = new AssistantModel({
   DBInstance,
-  assistantsManager,
-  vectorStoresManager,
-  vectorStoresFilesManager,
-  filesManager,
+  OpenAIInstance,
   assistantParams: CONFIG.ASSISTANTS.ASSISTANT.PARAMS,
   vectorStoreParams: CONFIG.ASSISTANTS.VECTOR_STORE.PARAMS,
   datasetGithub: CONFIG.DATASET.GITHUB
 })
 
-const discordConfigModel = new DiscordConfigModel({
+const discordModel = new DiscordModel({
   DBInstance
 })
 
@@ -82,7 +69,7 @@ server.disable('x-powered-by')
 // API Routes
 server.use('/health', createHealthRouter())
 server.use('/assistant', createAssistantRouter({ assistantModel }))
-server.use('/discord-config', createDiscordConfigRouter({ discordConfigModel }))
+server.use('/discord', createDiscordRouter({ discordModel }))
 
 // 404 Route
 server.use((req, res) => res.status(404).send({ error: 'Not Found' }))

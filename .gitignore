@@ -2,3 +2,4 @@
 node_modules
 containers/mysql/backups
 containers/assistant/src/utils/tools
+TODO.md

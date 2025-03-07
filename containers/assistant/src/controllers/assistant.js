@@ -4,9 +4,9 @@ export class AssistantController {
   }
 
   // Arrow functions do not have their own "this" context, they inherit it from the surrounding lexical context. Using them so "this" context remains consistent, so no need to bind in the router.
-  init = async (req, res) => {
+  initialize = async (req, res) => {
     try {
-      const { vectorStoreId } = await this.assistantModel.init()
+      const { vectorStoreId } = await this.assistantModel.initialize()
       res.json({ data: { vectorStoreId } })
     } catch (error) {
       res.status(500).send({ error: error.message })
