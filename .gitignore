@@ -1,4 +1,4 @@
 .env
 node_modules
-backups
+containers/mysql/backups
 containers/assistant/src/utils/tools

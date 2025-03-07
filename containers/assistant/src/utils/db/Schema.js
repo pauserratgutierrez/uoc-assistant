@@ -1,70 +1,72 @@
+import migrations from './schemas/index.js'
+
 export class Schema {
   #db
+  #migrations
 
   constructor(dbInstance) {
     this.#db = dbInstance
+    this.#migrations = migrations
+  }
+
+  get currentTargetVersion() {
+    // Find highest version from the migration list
+    return this.#migrations.reduce((max, m) => Math.max(max, m.version), 0)
   }
 
   async initialize() {
-    await this.createDatasetFilesTable()
-    await this.createDiscordUsersTable()
-    await this.createDiscordAiThreadsTable()
-    await this.createAiUsageTable()
+    await this.createVersionTable()
+
+    const currentVersion = await this.getCurrentVersion()
+    console.log(`Current schema version: ${currentVersion}, target version: ${this.currentTargetVersion}`)
+
+    // Run each migration in sequence
+    for (const m of this.#migrations) {
+      if (currentVersion < m.version) {
+        console.log(`Running migration: ${m.name} (v${m.version})`)
+
+        try {
+          await m.up(this.#db)
+          await this.setVersion(m.version)
+          console.log(`Migration ${m.name} (v${m.version}) completed`)
+        } catch (error) {
+          console.error(`Failed to apply migration ${m.name} (v${m.version}):`, error.message)
+          throw new Error(`Migration failure: ${error.message}`)
+        }
+      }
+    }
+
+    console.log('Database schema is up to date')
   }
 
-  async createDatasetFilesTable() {
+  async createVersionTable() {
     const sql = `
-      CREATE TABLE IF NOT EXISTS dataset_files (
-        gh_file_name VARCHAR(255) NOT NULL,
-        gh_file_dir_path VARCHAR(255) NOT NULL,
-        gh_file_hash VARCHAR(64) NOT NULL,
-        gh_repo VARCHAR(255) NOT NULL,
-        openai_file_id VARCHAR(50),
-        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY (gh_file_name, gh_file_dir_path, gh_repo)
+      CREATE TABLE IF NOT EXISTS schema_version (
+        version INT PRIMARY KEY,
+        name VARCHAR(255),
+        applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `
-    return await this.#db.rawQuery(sql)
+    await this.#db.rawQuery(sql)
   }
 
-  async createDiscordUsersTable() {
-    const sql = `
-      CREATE TABLE IF NOT EXISTS discord_users (
-        id int AUTO_INCREMENT PRIMARY KEY,
-        user_id VARCHAR(20) NOT NULL UNIQUE,
-        join_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `
-    return await this.#db.rawQuery(sql)
+  async getCurrentVersion() {
+    const tableExists = await this.#db.tableExists('schema_version')
+    if (!tableExists) return 0
+
+    const result = await this.#db.rawQuery('SELECT version FROM schema_version ORDER BY version DESC LIMIT 1')
+    // return result.length > 0 ? result[0].version : 0
+    return result.length ? result[0].version : 0
   }
 
-  async createDiscordAiThreadsTable() {
+  async setVersion(v, name = null) {
     const sql = `
-      CREATE TABLE IF NOT EXISTS discord_ai_threads (
-        user_id INT NOT NULL,
-        discord_thread_id VARCHAR(50) PRIMARY KEY,
-        openai_thread_id VARCHAR(50) NOT NULL,
-        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES discord_users(id) ON DELETE CASCADE,
-        CONSTRAINT uc_discord_users_threads UNIQUE (user_id, discord_thread_id)
-      )
+      INSERT INTO schema_version (version, name)
+      VALUES (?, ?)
+      ON DUPLICATE KEY UPDATE version = VALUES(version), name = VALUES(name)
     `
-    return await this.#db.rawQuery(sql)
-  }
-
-  async createAiUsageTable() {
-    const sql = `
-      CREATE TABLE IF NOT EXISTS ai_usage (
-        user_id INT NOT NULL,
-        model VARCHAR(50) NOT NULL,
-        prompt_token_cost INT NOT NULL,
-        completion_token_cost INT NOT NULL,
-        prompt_tokens INT NOT NULL,
-        completion_tokens INT NOT NULL,
-        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES discord_users(id) ON DELETE CASCADE
-      )
-    `
-    return await this.#db.rawQuery(sql)
+    await this.#db.query(sql, [v, name])
+    console.log(`Schema version set to ${v}`)
   }
 }

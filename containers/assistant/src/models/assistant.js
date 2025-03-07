@@ -1,12 +1,13 @@
 import { sync } from '../utils/dataset/sync.js'
-
 export class AssistantModel {
-  constructor({ assistantsManager, vectorStoresManager, vectorStoresFilesManager, filesManager, DBDatasetFilesManager, assistantParams, vectorStoreParams, datasetGithub }) {
+  #db
+
+  constructor({ DBInstance, assistantsManager, vectorStoresManager, vectorStoresFilesManager, filesManager, assistantParams, vectorStoreParams, datasetGithub }) {
+    this.#db = DBInstance
     this.assistantsManager = assistantsManager
     this.vectorStoresManager = vectorStoresManager
     this.vectorStoresFilesManager = vectorStoresFilesManager
     this.filesManager = filesManager
-    this.DBDatasetFilesManager = DBDatasetFilesManager
     this.assistantParams = assistantParams
     this.vectorStoreParams = vectorStoreParams
     this.datasetGithub = datasetGithub
@@ -66,7 +67,7 @@ export class AssistantModel {
     console.log(`Syncing dataset for ${this.datasetGithub.length} repositories`)
 
     for (const i of this.datasetGithub) {
-      await sync(this.DBDatasetFilesManager, this.vectorStoresFilesManager, this.filesManager, vectorStoreId, i)
+      await sync(this.#db, this.vectorStoresFilesManager, this.filesManager, vectorStoreId, i)
     }
 
     console.log('Sync complete')

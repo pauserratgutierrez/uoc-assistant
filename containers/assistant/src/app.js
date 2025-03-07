@@ -10,12 +10,13 @@ import { OpenAIFiles } from './utils/openai/managers/Files.js'
 
 import { DBClient } from './utils/db/Client.js'
 import { Schema } from './utils/db/Schema.js'
-import { DBDatasetFiles } from './utils/db/managers/DatasetFiles.js'
 
-import { createAssistantRouter } from './routes/assistant.js'
 import { createHealthRouter } from './routes/health.js'
+import { createAssistantRouter } from './routes/assistant.js'
+import { createDiscordConfigRouter } from './routes/discordConfig.js'
 
 import { AssistantModel } from './models/assistant.js'
+import { DiscordConfigModel } from './models/discordConfig.js'
 
 // OpenAI
 const aiClient = new OpenAIClient({ apiKey: process.env.OPENAI_API_KEY })
@@ -36,18 +37,20 @@ const DBInstance = DBClient.getInstance({
 const schema = new Schema(DBInstance)
 await schema.initialize()
 
-const DBDatasetFilesManager = new DBDatasetFiles(DBInstance)
-
 // Initialize Models
 const assistantModel = new AssistantModel({
+  DBInstance,
   assistantsManager,
   vectorStoresManager,
   vectorStoresFilesManager,
   filesManager,
-  DBDatasetFilesManager,
   assistantParams: CONFIG.ASSISTANTS.ASSISTANT.PARAMS,
   vectorStoreParams: CONFIG.ASSISTANTS.VECTOR_STORE.PARAMS,
   datasetGithub: CONFIG.DATASET.GITHUB
+})
+
+const discordConfigModel = new DiscordConfigModel({
+  DBInstance
 })
 
 async function cleanup(DBInstance) {
@@ -79,6 +82,7 @@ server.disable('x-powered-by')
 // API Routes
 server.use('/health', createHealthRouter())
 server.use('/assistant', createAssistantRouter({ assistantModel }))
+server.use('/discord-config', createDiscordConfigRouter({ discordConfigModel }))
 
 // 404 Route
 server.use((req, res) => res.status(404).send({ error: 'Not Found' }))

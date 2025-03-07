@@ -100,79 +100,127 @@ export class DBClient {
   //   }
   // }
 
-  // // Helper methods for common operations
-  // /**
-  //  * Find a single record matching conditions
-  //  * @param {string} table - Table name
-  //  * @param {Object} conditions - WHERE conditions
-  //  * @param {string|Array} fields - Fields to select
-  //  * @returns {Promise<Object|null>} - Found record or null
-  //  */
-  // async findOne(table, conditions = {}, fields = '*') {
-  //   const whereClauses = []
-  //   const params = []
+  /**
+   * Check if a table exists in the database
+   * @param {string} tableName - Name of table to check
+   * @returns {Promise<boolean>} - Whether table exists
+   */
+  async tableExists(tableName) {
+    try {
+      const [rows] = await this.#pool.query(
+        'SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?',
+        [tableName]
+      )
+      return rows[0].count > 0
+    } catch (error) {
+      console.error(`Failed to check if table ${tableName} exists:`, error.message)
+      return false
+    }
+  }
 
-  //   Object.entries(conditions).forEach(([key, value]) => {
-  //     whereClauses.push(`${key} = ?`)
-  //     params.push(value)
-  //   })
+  // Helper methods for common operations
+  /**
+   * Find a single record matching conditions
+   * @param {string} table - Table name
+   * @param {Object} conditions - WHERE conditions
+   * @param {string|Array} fields - Fields to select
+   * @returns {Promise<Object|null>} - Found record or null
+   */
+  async findOne(table, conditions = {}, fields = '*') {
+    const whereClauses = []
+    const params = []
 
-  //   const whereClause = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : ''
-  //   const fieldsStr = Array.isArray(fields) ? fields.join(', ') : fields
-  //   const sql = `SELECT ${fieldsStr} FROM ${table} ${whereClause} LIMIT 1`
+    Object.entries(conditions).forEach(([key, value]) => {
+      whereClauses.push(`${key} = ?`)
+      params.push(value)
+    })
 
-  //   const results = await this.query(sql, params)
-  //   return results[0] || null
-  // }
+    const whereClause = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : ''
+    const fieldsStr = Array.isArray(fields) ? fields.join(', ') : fields
+    const sql = `SELECT ${fieldsStr} FROM ${table} ${whereClause} LIMIT 1`
 
-  // /**
-  //  * Find all records matching conditions
-  //  * @param {string} table - Table name
-  //  * @param {Object} conditions - WHERE conditions
-  //  * @param {string|Array} fields - Fields to select
-  //  * @param {Object} options - Query options (orderBy, limit, offset)
-  //  * @returns {Promise<Array>} - Found records
-  //  */
-  // async findAll(table, conditions = {}, fields = '*', options = {}) {
-  //   const { orderBy, limit, offset } = options
-  //   const whereClauses = []
-  //   const params = []
+    const results = await this.query(sql, params)
+    return results[0] || null
+  }
 
-  //   Object.entries(conditions).forEach(([key, value]) => {
-  //     if (value === null) {
-  //       whereClauses.push(`${key} IS NULL`)
-  //     } else {
-  //       whereClauses.push(`${key} = ?`)
-  //       params.push(value)
-  //     }
-  //   })
+  /**
+   * Find all records matching conditions
+   * @param {string} table - Table name
+   * @param {Object} conditions - WHERE conditions
+   * @param {string|Array} fields - Fields to select
+   * @param {Object} options - Query options (orderBy, limit, offset)
+   * @returns {Promise<Array>} - Found records
+   */
+  async findAll(table, conditions = {}, fields = '*', options = {}) {
+    const { orderBy, limit, offset } = options
+    const whereClauses = []
+    const params = []
 
-  //   const whereClause = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : ''
-  //   const orderByClause = orderBy ? `ORDER BY ${orderBy}` : ''
-  //   const limitClause = limit ? `LIMIT ${parseInt(limit, 10)}` : ''
-  //   const offsetClause = offset ? `OFFSET ${parseInt(offset, 10)}` : ''
-  //   const fieldsStr = Array.isArray(fields) ? fields.join(', ') : fields
+    Object.entries(conditions).forEach(([key, value]) => {
+      if (value === null) {
+        whereClauses.push(`${key} IS NULL`)
+      } else {
+        whereClauses.push(`${key} = ?`)
+        params.push(value)
+      }
+    })
 
-  //   const sql = `SELECT ${fieldsStr} FROM ${table} ${whereClause} ${orderByClause} ${limitClause} ${offsetClause}`
+    const whereClause = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : ''
+    const orderByClause = orderBy ? `ORDER BY ${orderBy}` : ''
+    const limitClause = limit ? `LIMIT ${parseInt(limit, 10)}` : ''
+    const offsetClause = offset ? `OFFSET ${parseInt(offset, 10)}` : ''
+    const fieldsStr = Array.isArray(fields) ? fields.join(', ') : fields
 
-  //   return this.query(sql, params)
-  // }
+    const sql = `SELECT ${fieldsStr} FROM ${table} ${whereClause} ${orderByClause} ${limitClause} ${offsetClause}`
 
-  // /**
-  //  * Insert a new record
-  //  * @param {string} table - Table name
-  //  * @param {Object} data - Record data
-  //  * @returns {Promise<Object>} - Insert result
-  //  */
-  // async insert(table, data) {
-  //   const keys = Object.keys(data)
-  //   const placeholders = keys.map(() => '?').join(', ')
-  //   const values = Object.values(data)
+    return this.query(sql, params)
+  }
 
-  //   const sql = `INSERT INTO ${table} (${keys.join(', ')}) VALUES (${placeholders})`
+  /**
+   * Insert a new record
+   * @param {string} table - Table name
+   * @param {Object} data - Record data
+   * @returns {Promise<Object>} - Insert result
+   */
+  async insert(table, data) {
+    const keys = Object.keys(data)
+    const placeholders = keys.map(() => '?').join(', ')
+    const values = Object.values(data)
 
-  //   return await this.query(sql, values)
-  // }
+    const sql = `INSERT INTO ${table} (${keys.join(', ')}) VALUES (${placeholders})`
+
+    return await this.query(sql, values)
+  }
+
+  /**
+   * Insert a new record or update if it exists
+   * @param {string} table - Table name
+   * @param {Object} data - Record data to insert/update
+   * @param {Array} uniqueKeys - Keys that determine uniqueness
+   * @param {Object} [updateData=null] - Specific fields to update (defaults to all data fields)
+   * @returns {Promise<Object>} - Result of the operation
+   */
+  async upsert(table, data, uniqueKeys, updateData = null) {
+    const keys = Object.keys(data)
+    const values = Object.values(data)
+    const placeholders = keys.map(() => '?').join(', ')
+
+    const updateFields = updateData || data
+    const updateEntries = Object.entries(updateFields)
+      .filter(([key]) => !uniqueKeys.includes(key)) // Don't update primary/unique keys
+
+    const updateClauses = updateEntries.map(([key]) => 
+      `${key} = VALUES(${key})`
+    ).join(', ')
+
+    const sql = `
+      INSERT INTO ${table} (${keys.join(', ')})
+      VALUES (${placeholders})
+      ON DUPLICATE KEY UPDATE ${updateClauses}
+    `
+
+    return await this.query(sql, values)
+  }
 
   // /**
   //  * Insert multiple records at once
@@ -198,69 +246,69 @@ export class DBClient {
   //   return await this.query(sql, values)
   // }
 
-  // /**
-  //  * Update records matching conditions
-  //  * @param {string} table - Table name
-  //  * @param {Object} data - Update data
-  //  * @param {Object} conditions - WHERE conditions
-  //  * @returns {Promise<Object>} - Update result
-  //  */
-  // async update(table, data, conditions) {
-  //   const setValues = []
-  //   const whereValues = []
-  //   const setParams = []
-  //   const whereParams = []
+  /**
+   * Update records matching conditions
+   * @param {string} table - Table name
+   * @param {Object} data - Update data
+   * @param {Object} conditions - WHERE conditions
+   * @returns {Promise<Object>} - Update result
+   */
+  async update(table, data, conditions) {
+    const setValues = []
+    const whereValues = []
+    const setParams = []
+    const whereParams = []
 
-  //   Object.entries(data).forEach(([key, value]) => {
-  //     setValues.push(`${key} = ?`)
-  //     setParams.push(value)
-  //   })
+    Object.entries(data).forEach(([key, value]) => {
+      setValues.push(`${key} = ?`)
+      setParams.push(value)
+    })
 
-  //   Object.entries(conditions).forEach(([key, value]) => {
-  //     if (value === null) {
-  //       whereValues.push(`${key} IS NULL`)
-  //     } else {
-  //       whereValues.push(`${key} = ?`)
-  //       whereParams.push(value)
-  //     }
-  //   })
+    Object.entries(conditions).forEach(([key, value]) => {
+      if (value === null) {
+        whereValues.push(`${key} IS NULL`)
+      } else {
+        whereValues.push(`${key} = ?`)
+        whereParams.push(value)
+      }
+    })
 
-  //   if (whereValues.length === 0) {
-  //     throw new Error('Update requires conditions')
-  //   }
+    if (whereValues.length === 0) {
+      throw new Error('Update requires conditions')
+    }
 
-  //   const sql = `UPDATE ${table} SET ${setValues.join(', ')} WHERE ${whereValues.join(' AND ')}`
+    const sql = `UPDATE ${table} SET ${setValues.join(', ')} WHERE ${whereValues.join(' AND ')}`
 
-  //   return await this.query(sql, [...setParams, ...whereParams])
-  // }
+    return await this.query(sql, [...setParams, ...whereParams])
+  }
 
-  // /**
-  //  * Delete records matching conditions
-  //  * @param {string} table - Table name
-  //  * @param {Object} conditions - WHERE conditions
-  //  * @returns {Promise<Object>} - Delete result
-  //  */
-  // async delete(table, conditions) {
-  //   const whereValues = []
-  //   const whereParams = []
+  /**
+   * Delete records matching conditions
+   * @param {string} table - Table name
+   * @param {Object} conditions - WHERE conditions
+   * @returns {Promise<Object>} - Delete result
+   */
+  async delete(table, conditions) {
+    const whereValues = []
+    const whereParams = []
 
-  //   Object.entries(conditions).forEach(([key, value]) => {
-  //     if (value === null) {
-  //       whereValues.push(`${key} IS NULL`)
-  //     } else {
-  //       whereValues.push(`${key} = ?`)
-  //       whereParams.push(value)
-  //     }
-  //   })
+    Object.entries(conditions).forEach(([key, value]) => {
+      if (value === null) {
+        whereValues.push(`${key} IS NULL`)
+      } else {
+        whereValues.push(`${key} = ?`)
+        whereParams.push(value)
+      }
+    })
 
-  //   if (whereValues.length === 0) {
-  //     throw new Error('Delete requires conditions')
-  //   }
+    if (whereValues.length === 0) {
+      throw new Error('Delete requires conditions')
+    }
 
-  //   const sql = `DELETE FROM ${table} WHERE ${whereValues.join(' AND ')}`
+    const sql = `DELETE FROM ${table} WHERE ${whereValues.join(' AND ')}`
 
-  //   return await this.query(sql, whereParams)
-  // }
+    return await this.query(sql, whereParams)
+  }
 
   // /**
   //  * Count records in a table

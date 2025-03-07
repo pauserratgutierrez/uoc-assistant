@@ -5,7 +5,10 @@ import { initAssistant } from './utils/assistant/init.js'
 import { syncDataset } from './utils/assistant/syncDataset.js'
 import { buttonChatNew } from './utils/newChat.js'
 import { modalChatNew } from './utils/newChat.js'
-  
+
+import { getDiscordConfig } from './utils/discordConfig/getConfig.js'
+import { saveDiscordConfig } from './utils/discordConfig/saveConfig.js'
+
 const ASSISTANT_URL = `http://assistant:${process.env.ASSISTANT_PORT}`
 const { ASSISTANT: assistantChannelId } = CONFIG.DISCORD.CHANNELS
 const { NAME: assistantName, FOOTER: assistantFooter } = CONFIG.ASSISTANT
@@ -25,6 +28,38 @@ client.once(Events.ClientReady, async (readyClient) => {
 
   const vectorStoreId = await initAssistant(ASSISTANT_URL)
   await syncDataset(ASSISTANT_URL, vectorStoreId)
+
+  // Get Discord configuration
+  const { channelId: existingChannelId, roleId: existingRoleId } = await getDiscordConfig(ASSISTANT_URL)
+  const guild = client.guilds.cache.first()
+
+  let channelToUse = existingChannelId
+  let roleToUse = existingRoleId
+
+  if (!existingChannelId) {
+    console.log(`Creating a channel for the AI Assistant...`)
+    const channel = await guild.channels.create({
+      name: '✨ai-assistant',
+      type: 0,
+      topic: 'Ask questions about UOC and get AI-powered assistance',
+      permissionOverwrites: [
+        {
+          id: guild.id,
+          allow: ['ViewChannel', 'ReadMessageHistory'],
+          deny: ['SendMessages']
+        }
+      ]
+    })
+    channelToUse = channel.id
+  }
+
+  if (!existingRoleId) {
+    console.log(`Creating a role for the Assistant Manager...`)
+    const role = await guild.roles.create({ name: 'Assistant Manager', color: colorBrand })
+    roleToUse = role.id
+  }
+
+  await saveDiscordConfig(ASSISTANT_URL, channelToUse, roleToUse)
 
   await assistantChannelSetup(client, assistantChannelId, assistantName, assistantFooter, colorBrand)
 
