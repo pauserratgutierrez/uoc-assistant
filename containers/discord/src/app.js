@@ -32,6 +32,7 @@ client.once(Events.ClientReady, async (readyClient) => {
   const vectorStoreId = await APIInstance.initialize()
   await APIInstance.syncDataset(vectorStoreId)
 
+  // The channel or role could be stored in the DB but deleted in Discord. Check if the ids are still valid!
   const discordConfigIds = await APIInstance.getDiscordConfigIds()
   assistantChannelId = discordConfigIds.assistantChannelId
   assistantManagerRoleId = discordConfigIds.assistantManagerRoleId

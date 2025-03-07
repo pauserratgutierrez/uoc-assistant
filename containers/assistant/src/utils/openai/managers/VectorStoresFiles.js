@@ -27,26 +27,26 @@ export class OpenAIVectorStoresFiles {
    * List vector store files
    * https://platform.openai.com/docs/api-reference/vector-stores-files/listFiles
    */
-  // async listVectorStoresFiles(vector_store_id, {
-  //   limit,
-  //   order,
-  //   after,
-  //   before,
-  //   filter
-  // }) {
-  //   try {
-  //     const response = await this.openai.beta.vectorStores.files.list(vector_store_id, {
-  //       limit,
-  //       order,
-  //       after,
-  //       before,
-  //       filter
-  //     })
-  //     return response
-  //   } catch (error) {
-  //     throw new Error(error)
-  //   }
-  // }
+  async listVectorStoresFiles(vector_store_id, {
+    limit,
+    order,
+    after,
+    before,
+    filter
+  }) {
+    try {
+      const response = await this.openai.beta.vectorStores.files.list(vector_store_id, {
+        limit,
+        order,
+        after,
+        before,
+        filter
+      })
+      return response
+    } catch (error) {
+      throw new Error(error)
+    }
+  }
 
   /**
    * Retrieve vector store files

@@ -316,23 +316,23 @@ export class DBClient {
   //  * @param {Object} conditions - WHERE conditions
   //  * @returns {Promise<number>} - Count of records
   //  */
-  // async count(table, conditions = {}) {
-  //   const whereClauses = []
-  //   const params = []
+  async count(table, conditions = {}) {
+    const whereClauses = []
+    const params = []
 
-  //   Object.entries(conditions).forEach(([key, value]) => {
-  //     if (value === null) {
-  //       whereClauses.push(`${key} IS NULL`)
-  //     } else {
-  //       whereClauses.push(`${key} = ?`)
-  //       params.push(value)
-  //     }
-  //   })
+    Object.entries(conditions).forEach(([key, value]) => {
+      if (value === null) {
+        whereClauses.push(`${key} IS NULL`)
+      } else {
+        whereClauses.push(`${key} = ?`)
+        params.push(value)
+      }
+    })
 
-  //   const whereClause = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : ''
-  //   const sql = `SELECT COUNT(*) as count FROM ${table} ${whereClause}`
+    const whereClause = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : ''
+    const sql = `SELECT COUNT(*) as count FROM ${table} ${whereClause}`
 
-  //   const result = await this.query(sql, params)
-  //   return result[0].count
-  // }
+    const result = await this.query(sql, params)
+    return result[0].count
+  }
 }

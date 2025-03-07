@@ -55,7 +55,7 @@ docker compose up -d
 ```
 Management
 ```
-docker image prune -all
+docker image prune --all
 docker builder prune
 docker compose build --no-cache
 ```
