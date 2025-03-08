@@ -17,7 +17,7 @@ export const CONFIG = {
     VECTOR_STORE: {
       PARAMS: {
         name: 'UOC Assistant - Vector Store',
-        expires_after: { anchor: 'last_active_at', days: 20 },
+        expires_after: { anchor: 'last_active_at', days: 4 },
         chunking_strategy: { type: 'auto' },
         // chunking_strategy: {
         //   type: 'static',

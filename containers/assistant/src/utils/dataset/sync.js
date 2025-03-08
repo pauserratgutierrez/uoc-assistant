@@ -3,24 +3,35 @@ import { GHContent, GHMetadata } from '../github/fetch.js'
 
 // OpenAI API Files have an upload date (Could be used for tracking instead of the hash?)
 // OpenAI Files can't store metadata so using DB for hash and id (Could the file name manipulated to store metadata?)(up to 255 chars)
+// Add a validation step to check if all DB files exist in OpenAI and Vector Store
 
 // Helper to cleanup file from OpenAI and Vector Store (Modified, Deleted)
 async function cleanupFile(openaiM, vectorStoreId, openaiId) {
   if (!openaiId) return
 
-  const openaiFile = await openaiM.filesM.retrieveFile(openaiId)
-  if (!openaiFile) return
+  try {
+    const openaiFile = await openaiM.filesM.retrieveFile(openaiId)
+    if (!openaiFile) return
+  
+    // Delete from Vector Store if exists
+    try {
+      const vectorStoreFile = await openaiM.vectorStoresFilesM.retrieveVectorStoresFiles(vectorStoreId, openaiId)
+      if (vectorStoreFile) {
+        await openaiM.vectorStoresFilesM.deleteVectorStoresFiles(vectorStoreId, openaiId)
+        console.log(` • Deleted from Vector Store.`)
+      }
+    } catch (error) {
+      // File likely already deleted from Vector Store
+      console.error(` • Error cleaning up file from Vector Store (ID: ${openaiId}): ${error.message}`)
+    }
 
-  // Delete from Vector Store if exists
-  const vectorStoreFile = await openaiM.vectorStoresFilesM.retrieveVectorStoresFiles(vectorStoreId, openaiId)
-  if (vectorStoreFile) {
-    await openaiM.vectorStoresFilesM.deleteVectorStoresFiles(vectorStoreId, openaiId)
-    console.log(` • Deleted from Vector Store.`)
+    // Delete from OpenAI
+    await openaiM.filesM.deleteFile(openaiId)
+    console.log(` • Deleted from OpenAI.`)
+  } catch (error) {
+    // File likely already deleted from OpenAI
+    console.error(` • Error cleaning up file (ID: ${openaiId}): ${error.message}`)
   }
-
-  // Delete from OpenAI
-  await openaiM.filesM.deleteFile(openaiId)
-  console.log(` • Deleted from OpenAI.`)
 }
 
 // Helper to clean all files from OpenAI and Vector Store
@@ -61,7 +72,7 @@ async function processUpload(openaiM, vectorStoreId, owner, repo, filePath, ref,
   const uploadedFile = await openaiM.filesM.uploadFile({ file: fileObj, purpose: 'assistants' })
   console.log(' • Uploaded to OpenAI')
 
-  await openaiM.vectorStoresFilesM.createVectorStoresFiles(vectorStoreId, { file_id: uploadedFile.id })
+  await openaiM.vectorStoresFilesM.createAndPollVectorStoresFiles(vectorStoreId, { file_id: uploadedFile.id })
   console.log(' • Added to Vector Store')
 
   return uploadedFile.id
@@ -84,7 +95,7 @@ export async function sync(DBInstance, openaiM, vectorStoreId, datasetGithub) {
   // Clean up if no files in DB (fresh start)
   const dbCount = await DBInstance.count('dataset_files', { gh_repo: repo, gh_file_dir_path: dirPath })
   if (dbCount === 0) {
-    console.log('No files found in the DB. Cleaning up all files related to the Assistant Vector Store before syncing')
+    console.log('No files found in the DB. Trying to clean up all Assistant Vector Store files before syncing')
     await cleanupAllFiles(openaiM, vectorStoreId)
   }
 

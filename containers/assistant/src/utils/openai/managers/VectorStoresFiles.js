@@ -8,12 +8,31 @@ export class OpenAIVectorStoresFiles {
    * Create vector store file
    * https://platform.openai.com/docs/api-reference/vector-stores-files/createFile
    */
-  async createVectorStoresFiles(vector_store_id, {
+  // async createVectorStoresFiles(vector_store_id, {
+  //   file_id,
+  //   chunking_strategy
+  // }) {
+  //   try {
+  //     const response = await this.openai.beta.vectorStores.files.create(vector_store_id, {
+  //       file_id,
+  //       chunking_strategy
+  //     })
+  //     return response
+  //   } catch (error) {
+  //     throw new Error(error)
+  //   }
+  // }
+
+  /**
+   * Create vector store file and wait until processing completes
+   * https://platform.openai.com/docs/api-reference/vector-stores-files
+   */
+  async createAndPollVectorStoresFiles(vector_store_id, {
     file_id,
     chunking_strategy
   }) {
     try {
-      const response = await this.openai.beta.vectorStores.files.create(vector_store_id, {
+      const response = await this.openai.beta.vectorStores.files.createAndPoll(vector_store_id, {
         file_id,
         chunking_strategy
       })
