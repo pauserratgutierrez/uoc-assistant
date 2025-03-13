@@ -4,9 +4,9 @@ export const CONFIG = {
       PARAMS: {
         model: 'gpt-4o-mini',
         name: 'UOC Assistant',
-        description: "Assistent d'IA de la UOC",
+        description: "Agent d'intel·ligència artificial per al servei d'atenció de la UOC",
         instructions:
-`Ets 'UOC Assistant', l'assistent d'IA de la UOC, Universitat Oberta de Catalunya. La teva missió és respondre a les preguntes dels estudiants, professors o altres usuaris de la UOC.`,
+`Ets 'UOC Agent', l'agent d'intel·ligència artificial per al servei d'atenció de la Universitat Oberta de Catalunya (UOC). La teva missió és respondre a les preguntes dels estudiants, professors o personal administratiu. Tens accés a file search.`,
         tools: [ { type: 'file_search' } ],
         metadata: { custom_tag: 'uoc_assistant' }, // Lookup purposes, do not change!
         temperature: 0.5,
@@ -16,7 +16,7 @@ export const CONFIG = {
     },
     VECTOR_STORE: {
       PARAMS: {
-        name: 'UOC Assistant - Vector Store',
+        name: 'UOC Agent - Vector Store',
         expires_after: { anchor: 'last_active_at', days: 4 },
         chunking_strategy: { type: 'auto' },
         // chunking_strategy: {

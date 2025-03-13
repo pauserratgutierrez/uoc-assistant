@@ -31,7 +31,7 @@ export async function assistantChannelSetup(client, channelId, assistantName, as
 - 📑 Once our chat is closed it becomes read-only.
 
 **How to Start a New Chat**:
-1. Click the "**🛟 New Chat**" button below.
+1. Click the "**:sos: New Chat**" button below.
 2. Fill in the chat details.
 3. I'll create the chat for us.
 4. Join in, and let's get started!`
@@ -45,12 +45,17 @@ export async function assistantChannelSetup(client, channelId, assistantName, as
           .setCustomId('button_chat_new')
           .setLabel('New Chat')
           .setStyle(ButtonStyle.Primary)
-          .setEmoji('🛟'),
+          .setEmoji(':sos:'),
         new ButtonBuilder()
-          .setLabel('UOC')
+          .setLabel('Web UOC')
           .setStyle(ButtonStyle.Link)
-          .setEmoji('🌐')
-          .setURL('https://uoc.edu')
+          .setEmoji(':mortar_board:')
+          .setURL('https://uoc.edu'),
+        new ButtonBuilder()
+          .setLabel("Servei d'Atenció")
+          .setStyle(ButtonStyle.Link)
+          .setEmoji(':ring_buoy:')
+          .setURL('https://campus.uoc.edu/webapps/campus/estudiant/estudiant/servei_atencio/ca/')
       )
 
     await channel.send({

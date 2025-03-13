@@ -1,6 +1,6 @@
 export const CONFIG = {
   ASSISTANT: {
-    NAME: 'UOC Assistant',
+    NAME: 'UOC Agent',
     FOOTER: '✨ Powered by AI'
   },
   COLORS: {

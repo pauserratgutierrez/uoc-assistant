@@ -42,7 +42,7 @@ client.once(Events.ClientReady, async (readyClient) => {
   if (!assistantChannelId) {
     console.log(`Creating a channel for the AI Assistant...`)
     const channel = await guild.channels.create({
-      name: '✨ai-assistant',
+      name: '✨ai-agent',
       type: 0,
       topic: 'Ask questions about UOC and get AI-powered assistance',
       permissionOverwrites: [
@@ -57,8 +57,8 @@ client.once(Events.ClientReady, async (readyClient) => {
   }
 
   if (!assistantManagerRoleId) {
-    console.log(`Creating a role for the Assistant Manager...`)
-    const role = await guild.roles.create({ name: 'Assistant Manager', color: colorBrand })
+    console.log(`Creating a role for the Agent Manager...`)
+    const role = await guild.roles.create({ name: 'Agent Manager', color: colorBrand })
     assistantManagerRoleId = role.id
   }
 
