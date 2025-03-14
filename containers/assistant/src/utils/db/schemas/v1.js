@@ -3,18 +3,6 @@
  * Creates all tables needed for the Project
  */
 export async function up(db) {
-  await db.rawQuery(`
-    CREATE TABLE IF NOT EXISTS dataset_files (
-      gh_file_name VARCHAR(255) NOT NULL,
-      gh_file_dir_path VARCHAR(255) NOT NULL,
-      gh_file_hash VARCHAR(64) NOT NULL,
-      gh_repo VARCHAR(255) NOT NULL,
-      openai_file_id VARCHAR(50),
-      last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      PRIMARY KEY (gh_file_name, gh_file_dir_path, gh_repo)
-    )
-  `)
-
   await db.rawQuery(`    
     CREATE TABLE IF NOT EXISTS discord_users (
       id INT AUTO_INCREMENT PRIMARY KEY,

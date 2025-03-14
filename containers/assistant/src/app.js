@@ -2,7 +2,8 @@ import express, { json } from 'express'
 
 import { CONFIG } from './config.js'
 
-import { OpenAIClient } from './utils/openai/Client.js'
+import { OpenAIWrapper } from './utils/openai/OpenAI.js'
+
 import { DBClient } from './utils/db/Client.js'
 import { Schema } from './utils/db/Schema.js'
 
@@ -13,8 +14,9 @@ import { createDiscordRouter } from './routes/discord.js'
 import { AssistantModel } from './models/assistant.js'
 import { DiscordModel } from './models/discord.js'
 
-// OpenAI - Single client with all managers
-const OpenAIInstance = new OpenAIClient({ apiKey: process.env.OPENAI_API_KEY })
+// OpenAI
+const openaiWrapper = new OpenAIWrapper({ apiKey: process.env.OPENAI_API_KEY })
+const openai = openaiWrapper.getClient()
 
 // Database
 const DBInstance = DBClient.getInstance({
@@ -29,11 +31,10 @@ await schema.initialize()
 
 // Initialize Models
 const assistantModel = new AssistantModel({
-  DBInstance,
-  OpenAIInstance,
-  assistantParams: CONFIG.ASSISTANTS.ASSISTANT.PARAMS,
-  vectorStoreParams: CONFIG.ASSISTANTS.VECTOR_STORE.PARAMS,
-  datasetGithub: CONFIG.DATASET.GITHUB
+  // DBInstance,
+  openai,
+  vectorStoreParams: CONFIG.VECTOR_STORE_PARAMS,
+  dataset: CONFIG.DATASET_GITHUB
 })
 
 const discordModel = new DiscordModel({
@@ -68,7 +69,7 @@ server.disable('x-powered-by')
 
 // API Routes
 server.use('/health', createHealthRouter())
-server.use('/assistant', createAssistantRouter({ assistantModel }))
+server.use('/agent', createAssistantRouter({ assistantModel }))
 server.use('/discord', createDiscordRouter({ discordModel }))
 
 // 404 Route

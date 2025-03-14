@@ -29,8 +29,8 @@ const client = new Client({
 client.once(Events.ClientReady, async (readyClient) => {
   const { username, id } = readyClient.user
 
-  const vectorStoreId = await APIInstance.initialize()
-  await APIInstance.syncDataset(vectorStoreId)
+  const { vectorStoreId } = await APIInstance.setupDataset()
+  console.log(`Dataset setup completed with vector store ID: ${vectorStoreId}`)
 
   // The channel or role could be stored in the DB but deleted in Discord. Check if the ids are still valid!
   const discordConfigIds = await APIInstance.getDiscordConfigIds()

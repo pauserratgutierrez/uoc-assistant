@@ -45,16 +45,16 @@ export async function assistantChannelSetup(client, channelId, assistantName, as
           .setCustomId('button_chat_new')
           .setLabel('New Chat')
           .setStyle(ButtonStyle.Primary)
-          .setEmoji(':sos:'),
+          .setEmoji('🆘'),
         new ButtonBuilder()
           .setLabel('Web UOC')
           .setStyle(ButtonStyle.Link)
-          .setEmoji(':mortar_board:')
+          .setEmoji('🎓')
           .setURL('https://uoc.edu'),
         new ButtonBuilder()
           .setLabel("Servei d'Atenció")
           .setStyle(ButtonStyle.Link)
-          .setEmoji(':ring_buoy:')
+          .setEmoji('🛟')
           .setURL('https://campus.uoc.edu/webapps/campus/estudiant/estudiant/servei_atencio/ca/')
       )
 

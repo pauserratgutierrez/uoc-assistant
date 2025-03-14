@@ -5,33 +5,20 @@
 export class APIClient {
   constructor() {
     this.API_URL_BASE = `http://assistant:${process.env.ASSISTANT_PORT}`
-    this.ASSISTANT_ENDPOINT = '/assistant'
+    this.ASSISTANT_ENDPOINT = '/agent'
     this.DISCORD_ENDPOINT = '/discord'
   }
 
-  // ASSISTANT
-  async initialize() {
+  // AGENT
+  async setupDataset() {
     try {
-      const url = `${this.API_URL_BASE}${this.ASSISTANT_ENDPOINT}/initialize`
+      const url = `${this.API_URL_BASE}${this.ASSISTANT_ENDPOINT}/dataset/setup`
       const response = await fetch(url, { method: 'GET' })
       const body = await response.json()
       const { vectorStoreId } = body.data
-      return vectorStoreId
+      return { vectorStoreId }
     } catch (error) {
-      throw new Error(`Failed to initialize assistant: ${error}`)
-    }
-  }
-
-  async syncDataset(vectorStoreId) {
-    try {
-      const url = `${this.API_URL_BASE}${this.ASSISTANT_ENDPOINT}/dataset/sync`
-      await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vectorStoreId }),
-      })
-    } catch (error) {
-      throw new Error(`Failed to sync dataset: ${error}`)
+      throw new Error(`Failed to setup dataset: ${error}`)
     }
   }
 

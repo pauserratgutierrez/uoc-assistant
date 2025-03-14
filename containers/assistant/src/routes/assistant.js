@@ -7,8 +7,7 @@ export function createAssistantRouter({ assistantModel }) {
 
   const assistantController = new AssistantController({ assistantModel })
 
-  assistantRouter.get('/initialize', assistantController.initialize)
-  assistantRouter.post('/dataset/sync', assistantController.syncDataset)
+  assistantRouter.get('/dataset/setup', assistantController.setupDataset)
 
   return assistantRouter
 }
