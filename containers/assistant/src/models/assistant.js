@@ -118,28 +118,28 @@ export class AssistantModel {
         console.log('Vector Store created with ID:', vectorStore.id)
   
         await processFiles(vectorStore, ghFiles, vsMK, vsMV)
-      }
+      } else {
+        // Sync existing Vector Store
+        console.log('Syncing existing Vector Store with ID:', vectorStore.id)
+    
+        // Get current Vector Store files
+        const vsFiles = []
+        for await (const file of this.openai.vectorStores.files.list(vectorStore.id, { limit: 100, filter: 'completed' })) {
+          vsFiles.push(file)
+        }
+    
+        if (vsFiles.length === 0) { // Empty
+          console.log('Vector Store is empty. Adding all GitHub files...')
+          await processFiles(vectorStore, ghFiles, vsMK, vsMV)
+        } else { // Sync needed
+          console.log(`Found ${vsFiles.length} files in Vector Store. Syncing...`)
+          await syncFiles(vectorStore, ghFiles, vsFiles, vsMK, vsMV)
+        }
+    
+        console.log('Dataset setup complete.')
   
-      // Sync existing Vector Store
-      console.log('Syncing existing Vector Store with ID:', vectorStore.id)
-  
-      // Get current Vector Store files
-      const vsFiles = []
-      for await (const file of this.openai.vectorStores.files.list(vectorStore.id, { limit: 100, filter: 'completed' })) {
-        vsFiles.push(file)
-      }
-  
-      if (vsFiles.length === 0) { // Empty
-        console.log('Vector Store is empty. Adding all GitHub files...')
-        await processFiles(vectorStore, ghFiles, vsMK, vsMV)
-      } else { // Sync needed
-        console.log(`Found ${vsFiles.length} files in Vector Store. Syncing...`)
-        await syncFiles(vectorStore, ghFiles, vsFiles, vsMK, vsMV)
-      }
-  
-      console.log('Dataset setup complete.')
-
-      return { vectorStoreId: vectorStore.id }
+        return { vectorStoreId: vectorStore.id }
+      }  
     } catch (error) {
       console.error('Error in setupDataset:', error)
     }
