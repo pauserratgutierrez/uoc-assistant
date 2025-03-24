@@ -10,3 +10,5 @@ RUN chmod +x /etc/mysql/backup.sh
 
 COPY scripts/restore.sh /etc/mysql/restore.sh
 RUN chmod +x /etc/mysql/restore.sh
+
+COPY ./migrations/*.sql /docker-entrypoint-initdb.d/

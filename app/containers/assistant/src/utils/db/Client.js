@@ -8,13 +8,8 @@ export class DBClient {
     if (DBClient.#instance) throw new Error('Use DBClient.getInstance() to get instance.')
 
     const { host, user, password, database, port } = config
-
     this.#pool = mysql.createPool({
-      host,
-      user,
-      password,
-      database,
-      port,
+      host, user, password, database, port,
       connectionLimit: 10,
       queueLimit: 0,
       waitForConnections: true,
@@ -43,78 +38,24 @@ export class DBClient {
   }
 
   /**
-   * Execute a SQL query with prepared statement
-   * @param {string|Object} sql - SQL query or query options object
-   * @param {Array|Object} [params=[]] - Query parameters
+   * Execute a SQL query
+   * @param {string} sql - SQL query
+   * @param {Array} [params=[]] - Query parameters
+   * @param {boolean} [usePrepared=true] - Use prepared statement
    * @returns {Promise<Array>} - Query results
    */
-  async query(sql, params = []) {
+  async query(sql, params = [], usePrepared = true) {
     const connection = await this.#pool.getConnection()
     try {
-      const [rows] = await connection.execute(sql, params)
+      const [rows] = usePrepared
+        ? await connection.execute(sql, params)
+        : await connection.query(sql)
       return rows
     } catch (error) {
       console.error('Database query error:', error.message)
       throw error
     } finally {
       connection.release()
-    }
-  }
-
-  /**
-   * Execute a raw SQL query without prepared statement
-   * @param {string|Object} sql - SQL query or query options object
-   * @returns {Promise<Array>} - Query results
-   */
-  async rawQuery(sql) {
-    const connection = await this.#pool.getConnection()
-    try {
-      const [rows] = await connection.query(sql)
-      return rows
-    } catch (error) {
-      console.error('Database raw query error:', error.message)
-      throw error
-    } finally {
-      connection.release()
-    }
-  }
-
-  // /**
-  //  * Execute operations within a transaction
-  //  * @param {Function} callback - Function that receives connection and performs queries
-  //  * @returns {Promise<any>} - Transaction result
-  //  */
-  // async transaction(callback) {
-  //   const connection = await this.#pool.getConnection()
-  //   try {
-  //     await connection.beginTransaction()
-  //     const result = await callback(connection)
-  //     await connection.commit()
-  //     return result
-  //   } catch (error) {
-  //     await connection.rollback()
-  //     console.error('Database transaction failed:', error.message)
-  //     throw error
-  //   } finally {
-  //     connection.release()
-  //   }
-  // }
-
-  /**
-   * Check if a table exists in the database
-   * @param {string} tableName - Name of table to check
-   * @returns {Promise<boolean>} - Whether table exists
-   */
-  async tableExists(tableName) {
-    try {
-      const [rows] = await this.#pool.query(
-        'SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?',
-        [tableName]
-      )
-      return rows[0].count > 0
-    } catch (error) {
-      console.error(`Failed to check if table ${tableName} exists:`, error.message)
-      return false
     }
   }
 
@@ -222,30 +163,6 @@ export class DBClient {
     return await this.query(sql, values)
   }
 
-  // /**
-  //  * Insert multiple records at once
-  //  * @param {string} table - Table name
-  //  * @param {Array<Object>} records - Array of record data objects
-  //  * @returns {Promise<Object>} - Insert result
-  //  */
-  // async insertMany(table, records) {
-  //   if (!records.length) return { affectedRows: 0 }
-    
-  //   const keys = Object.keys(records[0])
-    
-  //   const placeholders = records.map(() => 
-  //     `(${keys.map(() => '?').join(', ')})`
-  //   ).join(', ')
-    
-  //   const values = records.flatMap(record => 
-  //     keys.map(key => record[key])
-  //   )
-
-  //   const sql = `INSERT INTO ${table} (${keys.join(', ')}) VALUES ${placeholders}`
-
-  //   return await this.query(sql, values)
-  // }
-
   /**
    * Update records matching conditions
    * @param {string} table - Table name
@@ -310,12 +227,12 @@ export class DBClient {
     return await this.query(sql, whereParams)
   }
 
-  // /**
-  //  * Count records in a table
-  //  * @param {string} table - Table name
-  //  * @param {Object} conditions - WHERE conditions
-  //  * @returns {Promise<number>} - Count of records
-  //  */
+  /**
+   * Count records in a table
+   * @param {string} table - Table name
+   * @param {Object} conditions - WHERE conditions
+   * @returns {Promise<number>} - Count of records
+   */
   async count(table, conditions = {}) {
     const whereClauses = []
     const params = []

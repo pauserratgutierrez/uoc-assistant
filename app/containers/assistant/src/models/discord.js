@@ -6,11 +6,11 @@ export class DiscordModel {
   }
 
   async getConfig() {
-    const config = await this.#db.findOne('discord_config', {}, '*')
+    const config = await this.#db.findOne('config_discord', {}, '*')
     return {
       config: config || {
-        assistant_channel_id: null,
-        assistant_manager_role_id: null
+        agent_channel_id: null,
+        agent_manager_role_id: null
       }
     }
   }
@@ -19,16 +19,16 @@ export class DiscordModel {
     const { config: currentConfig } = await this.getConfig()
 
     const configData = {
-      assistant_channel_id: channelId !== undefined ? channelId : currentConfig.assistant_channel_id,
-      assistant_manager_role_id: roleId !== undefined ? roleId : currentConfig.assistant_manager_role_id
+      agent_channel_id: channelId !== undefined ? channelId : currentConfig.agent_channel_id,
+      agent_manager_role_id: roleId !== undefined ? roleId : currentConfig.agent_manager_role_id
     }
 
-    if (currentConfig.assistant_channel_id !== null || currentConfig.assistant_manager_role_id !== null) {
-      await this.#db.update('discord_config', {
+    if (currentConfig.agent_channel_id !== null || currentConfig.agent_manager_role_id !== null) {
+      await this.#db.update('config_discord', {
         id: currentConfig.id
       }, configData)
     } else {
-      await this.#db.insert('discord_config', configData)
+      await this.#db.insert('config_discord', configData)
     }
   }
 }

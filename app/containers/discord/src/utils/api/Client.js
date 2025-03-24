@@ -29,8 +29,8 @@ export class APIClient {
       const response = await fetch(url, { method: 'GET' })
       const body = await response.json()
       const {
-        assistant_channel_id: assistantChannelId,
-        assistant_manager_role_id: assistantManagerRoleId
+        agent_channel_id: assistantChannelId,
+        agent_manager_role_id: assistantManagerRoleId
       } = body.data.config
       return { assistantChannelId, assistantManagerRoleId } // Values or null
     } catch (error) {
