@@ -5,7 +5,6 @@ import { CONFIG } from './config.js'
 import { OpenAIWrapper } from './utils/openai/OpenAI.js'
 
 import { DBClient } from './utils/db/Client.js'
-import { Schema } from './utils/db/Schema.js'
 
 import { createHealthRouter } from './routes/health.js'
 import { createAssistantRouter } from './routes/assistant.js'
@@ -19,31 +18,21 @@ const openaiWrapper = new OpenAIWrapper({ apiKey: process.env.OPENAI_API_KEY })
 const openai = openaiWrapper.getClient()
 
 // Database
-const DBInstance = DBClient.getInstance({
+const db = DBClient.getInstance({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   port: process.env.DB_PORT
 })
-const schema = new Schema(DBInstance)
-await schema.initialize()
 
 // Initialize Models
-const assistantModel = new AssistantModel({
-  // DBInstance,
-  openai,
-  vectorStoreParams: CONFIG.VECTOR_STORE_PARAMS,
-  dataset: CONFIG.DATASET_GITHUB
-})
+const assistantModel = new AssistantModel({ openai, vectorStoreParams: CONFIG.VECTOR_STORE_PARAMS, dataset: CONFIG.DATASET_GITHUB })
+const discordModel = new DiscordModel({ db })
 
-const discordModel = new DiscordModel({
-  DBInstance
-})
-
-async function cleanup(DBInstance) {
+async function cleanup(db) {
   try {
-    await DBInstance.close()
+    await db.close()
     console.log('Database connection closed.')
   } catch (error) {
     console.error('Error in cleanup process:', error)
@@ -52,13 +41,13 @@ async function cleanup(DBInstance) {
 
 process.on('uncaughtException', async (error) => {
   console.error('Uncaught exception:', error)
-  await cleanup(DBInstance)
+  await cleanup(db)
   process.exit(1)
 })
 
 process.on('SIGINT', async () => {
   console.log('Received SIGINT, shutting down gracefully...')
-  await cleanup(DBInstance)
+  await cleanup(db)
   process.exit(0)
 })
 

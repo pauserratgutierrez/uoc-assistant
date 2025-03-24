@@ -4,8 +4,7 @@ import { GHContent, GHMetadata } from '../utils/github/utils.js'
 export class AssistantModel {
   // #db
 
-  constructor({ /*DBInstance,*/ openai, vectorStoreParams, dataset }) {
-    // this.#db = DBInstance
+  constructor({ openai, vectorStoreParams, dataset }) {
     this.openai = openai
     this.vectorStoreParams = vectorStoreParams
     this.dataset = dataset
@@ -110,7 +109,7 @@ export class AssistantModel {
         ghFiles.push(...metadata)
       }))
       console.log(`Found a total of ${ghFiles.length} files in GitHub. Processing...`)
-  
+
       if (!vectorStore) {
         // Create new Vector Store
         console.log('Creating new Vector Store...')
@@ -135,13 +134,44 @@ export class AssistantModel {
           console.log(`Found ${vsFiles.length} files in Vector Store. Syncing...`)
           await syncFiles(vectorStore, ghFiles, vsFiles, vsMK, vsMV)
         }
-    
-        console.log('Dataset setup complete.')
-  
-        return { vectorStoreId: vectorStore.id }
-      }  
+      }
+
+      console.log('Dataset setup complete.')
+      return { vectorStoreId: vectorStore.id }
     } catch (error) {
       console.error('Error in setupDataset:', error)
+    }
+  }
+
+  async chatResponse({ vector_store_id, discord_thread_id, discord_user_id, message }) {
+    try {
+      // Check if a user already exists in users by the discord_id in users_platforms
+      // If not, create a new user
+      // Also, retrieve the previous_response_id from the DB
+
+      const response = await this.openai.responses.create({
+        model: 'gpt-4o-mini',
+        input: message,
+        store: true,
+        stream: false,
+        temperature: 0.5,
+        tool_choice: { type: 'file_search' },
+        tools: [{
+          type: 'file_search',
+          vector_store_ids: [vector_store_id],
+          max_num_results: 10,
+          ranking_options: { ranker: 'auto', score_threshold: 0.5 }
+        }],
+        truncation: 'auto',
+        previous_response_id
+      })
+      const { output_text: response_text } = response
+
+      // Save the response ID to the database
+
+      return { response_text }
+    } catch (error) {
+      console.error('Error in chatResponse:', error)
     }
   }
 }

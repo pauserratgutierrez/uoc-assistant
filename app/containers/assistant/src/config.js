@@ -15,7 +15,7 @@ export const CONFIG = {
       owner: 'pauserratgutierrez',
       repo: 'uoc-assistant',
       branch: 'main',
-      path: 'data/formatted',
+      path: 'dataset/data/formatted',
     },
     // Additional repositories can be added here
   ],

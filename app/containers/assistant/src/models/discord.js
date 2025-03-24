@@ -1,8 +1,8 @@
 export class DiscordModel {
   #db
 
-  constructor({ DBInstance }) {
-    this.#db = DBInstance
+  constructor({ db }) {
+    this.#db = db
   }
 
   async getConfig() {

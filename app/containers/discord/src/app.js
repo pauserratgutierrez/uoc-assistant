@@ -13,6 +13,7 @@ const { CORPORATIVE: colorCorp, MASTERBRAND: colorBrand } = CONFIG.COLORS
 
 let assistantChannelId = null
 let assistantManagerRoleId = null
+let vectorStoreId = null
 
 // API
 const APIInstance = new APIClient()
@@ -29,7 +30,8 @@ const client = new Client({
 client.once(Events.ClientReady, async (readyClient) => {
   const { username, id } = readyClient.user
 
-  const { vectorStoreId } = await APIInstance.setupDataset()
+  const result = await APIInstance.setupDataset()
+  vectorStoreId = result.vectorStoreId
   console.log(`Dataset setup completed with vector store ID: ${vectorStoreId}`)
 
   // The channel or role could be stored in the DB but deleted in Discord. Check if the ids are still valid!
@@ -90,7 +92,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (interaction.isModalSubmit()) {
-    if (id === 'modal_chat_new') await modalChatNew(interaction, assistantFooter, colorBrand)
+    if (id === 'modal_chat_new') await modalChatNew(interaction, APIInstance, vectorStoreId, assistantFooter, colorBrand)
   }
 })
 

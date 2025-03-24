@@ -22,6 +22,27 @@ export class APIClient {
     }
   }
 
+  async chatResponse({ vector_store_id, discord_thread_id, discord_user_id, message }) {
+    try {
+      const url = `${this.API_URL_BASE}${this.ASSISTANT_ENDPOINT}/chat`
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vector_store_id,
+          discord_thread_id,
+          discord_user_id,
+          message
+        }),
+      })
+      const body = await response.json()
+      const { response_text } = body.data
+      return { response_text }
+    } catch (error) {
+      throw new Error(`Failed to get chat response: ${error}`)
+    }
+  }
+
   // DISCORD
   async getDiscordConfigIds() {
     try {
