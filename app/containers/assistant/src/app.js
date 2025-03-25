@@ -27,7 +27,7 @@ const db = DBClient.getInstance({
 })
 
 // Initialize Models
-const assistantModel = new AssistantModel({ openai, vectorStoreParams: CONFIG.VECTOR_STORE_PARAMS, dataset: CONFIG.DATASET_GITHUB })
+const assistantModel = new AssistantModel({ db, openai, vectorStoreParams: CONFIG.VECTOR_STORE_PARAMS, dataset: CONFIG.DATASET_GITHUB })
 const discordModel = new DiscordModel({ db })
 
 async function cleanup(db) {

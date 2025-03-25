@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS chats (
   user_id INT NOT NULL,
   platform VARCHAR(50) NOT NULL,
   chat_id VARCHAR(50) NOT NULL,
-  previous_response_id VARCHAR(50),
+  previous_response_id VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (user_id, platform, chat_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

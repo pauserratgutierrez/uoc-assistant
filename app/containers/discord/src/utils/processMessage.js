@@ -32,8 +32,8 @@ export async function processMessage(discordThread, discordUserId, APIInstance, 
     // AI, API, DB...
     const responseData = await APIInstance.chatResponse({
       vector_store_id: vectorStoreId,
-      discord_thread_id: discordThread.id,
-      discord_user_id: discordUserId,
+      chatId: discordThread.id,
+      platformUserId: discordUserId,
       message: userMessage,
     })
     const { response_text } = responseData

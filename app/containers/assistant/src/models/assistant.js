@@ -2,9 +2,10 @@ import { toFile } from 'openai'
 import { GHContent, GHMetadata } from '../utils/github/utils.js'
 
 export class AssistantModel {
-  // #db
+  #db
 
-  constructor({ openai, vectorStoreParams, dataset }) {
+  constructor({ db, openai, vectorStoreParams, dataset }) {
+    this.#db = db
     this.openai = openai
     this.vectorStoreParams = vectorStoreParams
     this.dataset = dataset
@@ -143,11 +144,36 @@ export class AssistantModel {
     }
   }
 
-  async chatResponse({ vector_store_id, discord_thread_id, discord_user_id, message }) {
+  async chatResponse({ vector_store_id, chatId, platformUserId, platform, message }) {
     try {
-      // Check if a user already exists in users by the discord_id in users_platforms
-      // If not, create a new user
-      // Also, retrieve the previous_response_id from the DB
+      // Check for an existing user
+      const userPlatform = await this.#db.findOne('users_platforms',
+        { platform, platform_user_id: platformUserId },
+      )
+      let user_id
+      if (!userPlatform) {
+        // Create a new user
+        const insertResult = await this.#db.insert('users', {})
+        user_id = insertResult.insertId
+        await this.#db.insert('users_platforms', {
+          user_id,
+          platform,
+          platform_user_id: platformUserId,
+        })
+        console.log(`Created new user with id ${user_id} for Discord user ${platformUserId}`)
+      } else {
+        user_id = userPlatform.user_id
+        console.log(`Found existing user with id ${user_id} for Discord user ${platformUserId}`)
+      }
+
+      // Retrieve previous response ID
+      const chatRecord = await this.#db.findOne('chats', {
+        user_id,
+        platform,
+        chat_id: chatId,
+      })
+      const previous_response_id = chatRecord ? chatRecord.previous_response_id : null
+      console.log(`Previous response ID: ${previous_response_id}`)
 
       const response = await this.openai.responses.create({
         model: 'gpt-4o-mini',
@@ -165,9 +191,16 @@ export class AssistantModel {
         truncation: 'auto',
         previous_response_id
       })
-      const { output_text: response_text } = response
+      const { id: response_id, output_text: response_text } = response
+      console.log(`Response ID: ${response_id}`)
 
-      // Save the response ID to the database
+      // Upsert chat record
+      await this.#db.upsert('chats', {
+        user_id,
+        platform,
+        chat_id: chatId,
+        previous_response_id: response_id
+      }, ['user_id', 'platform', 'chat_id'])
 
       return { response_text }
     } catch (error) {
