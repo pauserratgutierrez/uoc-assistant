@@ -177,16 +177,17 @@ export class AssistantModel {
 
       const response = await this.openai.responses.create({
         model: 'gpt-4o-mini',
+        instructions: `Ets 'UOC Agent'. La teva missió és oferir respostes als alumnes, professors i personal administratiu de la Universitat Oberta de Catalunya (UOC). Demana més informació si et falta context per poder respondre. Si no saps com respondre, digues-ho obertament i si cal, redirigeix al servei d'atenció de la UOC: https://campus.uoc.edu/webapps/campus/estudiant/estudiant/servei_atencio/ca/. Respon de manera clara i concisa, evita ser massa tècnic. No responguis a preguntes fora de l'ambit de la UOC, la universitat o l'educació en general.`,
         input: message,
         store: true,
         stream: false,
-        temperature: 0.5,
+        temperature: 0.7,
         tool_choice: { type: 'file_search' },
         tools: [{
           type: 'file_search',
           vector_store_ids: [vector_store_id],
-          max_num_results: 10,
-          ranking_options: { ranker: 'auto', score_threshold: 0.5 }
+          max_num_results: 6,
+          ranking_options: { ranker: 'auto', score_threshold: 0.6 }
         }],
         truncation: 'auto',
         previous_response_id

@@ -29,7 +29,6 @@ export async function processMessage(discordThread, discordUserId, APIInstance, 
     await discordThread.sendTyping()
     typingInterval = setInterval(() => discordThread.sendTyping(), 10000)
 
-    // AI, API, DB...
     const responseData = await APIInstance.chatResponse({
       vector_store_id: vectorStoreId,
       chatId: discordThread.id,

@@ -8,6 +8,8 @@ import { assistantChannelSetup } from './utils/channelSetup.js'
 import { buttonChatNew } from './utils/newChat.js'
 import { modalChatNew } from './utils/newChat.js'
 
+import { processMessage } from './utils/processMessage.js'
+
 const { NAME: assistantName, FOOTER: assistantFooter } = CONFIG.ASSISTANT
 const { CORPORATIVE: colorCorp, MASTERBRAND: colorBrand } = CONFIG.COLORS
 
@@ -78,6 +80,7 @@ client.on(Events.MessageCreate, async (message) => {
   if (bot) return
   if (message.channel.isThread() && parentId === assistantChannelId && ownerId === client.user.id) {
     // Generate AI response
+    await processMessage(message.channel, message.author.id, APIInstance, vectorStoreId, message.content, message.attachments, colorBrand, assistantFooter)
   }
 })
 
