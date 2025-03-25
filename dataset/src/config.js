@@ -7,9 +7,7 @@ export const config = {
     ALLOWED_CONTENT_TYPES: ['text/html'],
     EXCLUDE_PATTERNS: [
       /\/(en(?:g)?|es(?:p)?|pe(?:r)?|m(?:e)?x|ec(?:u)?|co(?:l)?|c(?:h)?l)(\/|$)/i,
-
       /\/(?:opencms_portal2|opencms_alumni|opencms|documents|content|news|recerca|uocpapers|shop|experience|graduacio)(\/|$)/i,
-
       /\.(zip|rar|webp|png|jpg|jpeg|gif|mp3|mp4|pdf|pptx|css|js|svg|ico|eot|ttf|woff|woff2|otf|webm|ogg|wav|flac|m4a|mkv|mov|avi|wmv|flv|swf|exe|docx|xlsx|msi|dmg|iso|bin)/i,
     ],
     DOM_ELEMENTS_REMOVE: [
@@ -48,11 +46,11 @@ export const config = {
     ],
     DYNAMIC_CRAWLING: true,
     RETRY_STATUS_CODES: [408, 500, 502, 503, 504],
-    REQUEST_TIMEOUT: 4000,
-    MAX_REDIRECTS: 2,
-    MAX_CONTENT_LENGTH: 20 * 1024 * 1024, // 20MB
+    REQUEST_TIMEOUT: 6000,
+    MAX_REDIRECTS: 6,
+    MAX_CONTENT_LENGTH: 40 * 1024 * 1024, // 20MB
     MAX_RETRIES: 0,
-    CRAWL_DELAY_MS: 800,
+    CRAWL_DELAY_MS: 500,
     CRAWL_ERROR_RETRY_DELAY_MS: 0,
     CRAWL_RATE_LIMIT_FALLBACK_DELAY_MS: 0,
     EXIT_ON_RATE_LIMIT: true,
