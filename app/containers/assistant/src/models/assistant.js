@@ -96,11 +96,16 @@ export class AssistantModel {
       // Get existing Vector Stores
       for await (const vs of this.openai.vectorStores.list({ limit: 20 })) {
         if (vs?.metadata?.[vsMK] === vsMV) {
+          // Status: expired, in_progress, completed
+          if (vs.status === 'expired') {
+            console.log(`Found a Vector Store ${vs.id} that has expired. Skipping...`)
+            continue
+          }
           vectorStore = vs
           break
         }
       }
-  
+
       // Get all GitHub files metadata
       console.log('Getting all GitHub files metadata...')
       const ghFiles = []
