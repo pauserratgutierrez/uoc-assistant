@@ -1,4 +1,4 @@
 #!/bin/sh
 
 set -e
-exec node src/app.js
+exec node --run start
