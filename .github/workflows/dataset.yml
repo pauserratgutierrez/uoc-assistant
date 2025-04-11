@@ -1,0 +1,53 @@
+name: Dataset Update
+
+on:
+  schedule:
+    - cron: '0 0 1,8,15,22 * *' # Run at 12:00 AM UTC on the 1st, 8th, 15th, and 22nd of every month (4 times a month)
+  workflow_dispatch: # Allows manual triggering from the GitHub UI
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_PATH: dataset
+      # NODE_CMD: node --run start
+      NODE_CMD: npm run start
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.14.0'
+          cache: 'npm'
+          cache-dependency-path: ${{ env.PROJECT_PATH }}/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd ${{ env.PROJECT_PATH }}    
+          npm ci
+
+      - name: Run Extractor
+        id: run_extractor
+        run: |
+          cd ${{ env.PROJECT_PATH }}
+          ${{ env.NODE_CMD }}
+        continue-on-error: true
+
+      - name: Get current date
+        id: now
+        run: echo "date=$(date +'%d-%m-%Y %H:%M:%S')" >> $GITHUB_OUTPUT
+
+      - name: Commit and push if changes
+        run: |
+          git config --global user.name 'Scheduled Dataset Update'
+          git config --global user.email 'github-actions@github.com'
+          git add ${{ env.PROJECT_PATH }}/data/*
+          git diff --quiet && git diff --staged --quiet || git commit -m "Scheduled Dataset Update on ${{ steps.now.outputs.date }}"
+          git push
+permissions:
+  contents: write
+  actions: write
