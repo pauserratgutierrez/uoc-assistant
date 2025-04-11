@@ -2,8 +2,8 @@ export const config = {
   MAIN_DIR: 'data',
 
   CRAWLER: {
-    INITIAL_URLS: ['https://uoc.edu'],
-    INCLUDE_URLS: ['https://uoc.edu'],
+    INITIAL_URLS: ['https://uoc.edu/ca'],
+    INCLUDE_URLS: ['https://uoc.edu/ca'],
     ALLOWED_CONTENT_TYPES: ['text/html'],
     EXCLUDE_PATTERNS: [
       /\/(en(?:g)?|es(?:p)?|pe(?:r)?|m(?:e)?x|ec(?:u)?|co(?:l)?|c(?:h)?l)(\/|$)/i,
@@ -46,11 +46,11 @@ export const config = {
     ],
     DYNAMIC_CRAWLING: true,
     RETRY_STATUS_CODES: [408, 500, 502, 503, 504],
-    REQUEST_TIMEOUT: 6000,
-    MAX_REDIRECTS: 6,
+    REQUEST_TIMEOUT: 10000,
+    MAX_REDIRECTS: 10,
     MAX_CONTENT_LENGTH: 40 * 1024 * 1024, // 20MB
-    MAX_RETRIES: 0,
-    CRAWL_DELAY_MS: 500,
+    MAX_RETRIES: 1,
+    CRAWL_DELAY_MS: 300,
     CRAWL_ERROR_RETRY_DELAY_MS: 0,
     CRAWL_RATE_LIMIT_FALLBACK_DELAY_MS: 0,
     EXIT_ON_RATE_LIMIT: true,
