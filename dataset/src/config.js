@@ -3,7 +3,7 @@ export const config = {
 
   CRAWLER: {
     INITIAL_URLS: ['https://uoc.edu/ca'],
-    INCLUDE_URLS: ['https://uoc.edu/ca'],
+    INCLUDE_URLS: ['https://uoc.edu/ca', 'https://uoc.edu/portal/ca'],
     ALLOWED_CONTENT_TYPES: ['text/html'],
     EXCLUDE_PATTERNS: [
       /\/(en(?:g)?|es(?:p)?|pe(?:r)?|m(?:e)?x|ec(?:u)?|co(?:l)?|c(?:h)?l)(\/|$)/i,
@@ -50,7 +50,7 @@ export const config = {
     MAX_REDIRECTS: 10,
     MAX_CONTENT_LENGTH: 40 * 1024 * 1024, // 20MB
     MAX_RETRIES: 1,
-    CRAWL_DELAY_MS: 300,
+    CRAWL_DELAY_MS: 600,
     CRAWL_ERROR_RETRY_DELAY_MS: 0,
     CRAWL_RATE_LIMIT_FALLBACK_DELAY_MS: 0,
     EXIT_ON_RATE_LIMIT: true,
