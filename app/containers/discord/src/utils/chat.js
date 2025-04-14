@@ -59,3 +59,37 @@ export async function modalChatNew(interaction, APIInstance, vectorStoreId, assi
     }
   }
 }
+
+export async function buttonCloseChat(interaction, APIInstance, assistantFooter, color) {
+  try {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral })
+
+    const thread = interaction.channel
+    const userId = interaction.user.id
+
+    if (thread.locked) return await interaction.editReply({ content: '🔒 The conversation is already closed.'})
+    await thread.setLocked(true)
+
+    await APIInstance.deleteChat({ chatId: thread.id, platformUserId: userId })
+
+    const closeEmbed = new EmbedBuilder()
+      .setDescription(`🔒 Conversation closed by <@${userId}>.`)
+      .setColor(color)
+      .setFooter({ text: assistantFooter, iconURL: interaction.client.user.displayAvatarURL() })
+    await thread.send({ embeds: [closeEmbed] })
+
+    await interaction.editReply({ content: '🔒 The conversation has been closed.' })
+    await thread.setArchived(true)
+  } catch (error) {
+    console.log('Failed to close chat:', error)
+    try {
+      if (interaction.deferred) {
+        await interaction.editReply({ content: `🚨 Oops! Something went wrong while closing the chat. Please try again later.` });
+      } else {
+        await interaction.reply({ content: `🚨 Oops! Something went wrong while closing the chat. Please try again later.`, flags: MessageFlags.Ephemeral })
+      }
+    } catch (replyError) {
+      console.log('Failed to send error message to user:', replyError);
+    }
+  }
+}

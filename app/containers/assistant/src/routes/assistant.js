@@ -9,6 +9,7 @@ export function createAssistantRouter({ assistantModel }) {
 
   // Chat
   assistantRouter.post('/chat', assistantController.chatResponse)
+  assistantRouter.delete('/chat', assistantController.deleteChat)
 
   return assistantRouter
 }

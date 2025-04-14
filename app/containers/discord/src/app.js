@@ -5,8 +5,7 @@ import { Client, Events, GatewayIntentBits } from 'discord.js'
 import { APIClient } from './utils/api/Client.js'
 
 import { assistantChannelSetup } from './utils/channelSetup.js'
-import { buttonChatNew } from './utils/newChat.js'
-import { modalChatNew } from './utils/newChat.js'
+import { buttonChatNew, modalChatNew, buttonCloseChat } from './utils/chat.js'
 
 import { processMessage } from './utils/processMessage.js'
 
@@ -79,7 +78,8 @@ client.on(Events.MessageCreate, async (message) => {
 
   if (bot) return
   if (message.channel.isThread() && parentId === assistantChannelId && ownerId === client.user.id) {
-    // Generate AI response
+    if (message.channel.locked) return await message.delete()
+
     await processMessage(message.channel, message.author.id, APIInstance, vectorStoreId, message.content, message.attachments, colorBrand, assistantFooter)
   }
 })
@@ -89,9 +89,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   if (interaction.isButton()) {
     if (id === 'button_chat_new') await buttonChatNew(interaction)
-    if (id === 'button_chat_end') {
-      // Button end chat action
-    }
+    if (id === 'button_chat_end') await buttonCloseChat(interaction, APIInstance, assistantFooter, colorBrand)
   }
 
   if (interaction.isModalSubmit()) {

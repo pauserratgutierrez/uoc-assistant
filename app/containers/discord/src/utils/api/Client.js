@@ -44,6 +44,24 @@ export class APIClient {
     }
   }
 
+  async deleteChat({ chatId, platformUserId }) {
+    try {
+      const url = `${this.API_URL_BASE}${this.ASSISTANT_ENDPOINT}/chat`;
+      await fetch(url, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chatId,
+          platformUserId,
+          platform: 'discord',
+        }),
+      });
+      return true;
+    } catch (error) {
+      throw new Error(`Failed to delete chat: ${error}`);
+    }
+  }
+
   // DISCORD
   async getDiscordConfigIds() {
     try {

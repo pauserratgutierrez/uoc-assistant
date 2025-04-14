@@ -28,4 +28,18 @@ export class AssistantController {
       res.status(500).send({ error: error.message })
     }
   }
+
+  deleteChat = async (req, res) => {
+    try {
+      const { chatId, platformUserId, platform } = req.body
+      const result = await this.assistantModel.deleteChat({
+        chatId,
+        platformUserId,
+        platform,
+      })
+      res.json({ data: { result } })
+    } catch (error) {
+      res.status(500).send({ error: error.message })
+    }
+  }
 }

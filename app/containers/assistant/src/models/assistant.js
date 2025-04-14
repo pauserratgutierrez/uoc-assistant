@@ -213,4 +213,27 @@ export class AssistantModel {
       console.error('Error in chatResponse:', error)
     }
   }
+
+  async deleteChat({ chatId, platformUserId, platform }) {
+    try {
+      // Check for an existing user
+      const userPlatform = await this.#db.findOne('users_platforms',
+        { platform, platform_user_id: platformUserId },
+      )
+      if (!userPlatform) {
+        console.log(`User not found for platform user ID ${platformUserId}`)
+        return
+      }
+      const user_id = userPlatform.user_id
+
+      // Delete chat record
+      await this.#db.delete('chats', {
+        user_id,
+        platform,
+        chat_id: chatId,
+      })
+    } catch (error) {
+      console.error('Error in deleteChat:', error)
+    }
+  }
 }
