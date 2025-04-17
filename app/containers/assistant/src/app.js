@@ -64,5 +64,8 @@ server.use('/discord', createDiscordRouter({ discordModel }))
 // 404 Route
 server.use((req, res) => res.status(404).send({ error: 'Not Found' }))
 
+// Auto-sync Dataset on Startup
+await assistantModel.setupDataset()
+
 const PORT = process.env.ASSISTANT_PORT
 server.listen(PORT, () => console.log(`API Server running on port ${PORT}`))

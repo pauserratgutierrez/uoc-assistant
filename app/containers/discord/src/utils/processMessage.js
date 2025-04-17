@@ -1,6 +1,6 @@
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js'
 
-export async function processMessage(discordThread, discordUserId, APIInstance, vectorStoreId, userMessage, discordAttachments = [], color, assistantFooter) {
+export async function processMessage(discordThread, discordUserId, APIInstance, userMessage, discordAttachments = [], color, assistantFooter) {
   let typingInterval
 
   try {
@@ -30,7 +30,6 @@ export async function processMessage(discordThread, discordUserId, APIInstance, 
     typingInterval = setInterval(() => discordThread.sendTyping(), 10000)
 
     const responseData = await APIInstance.chatResponse({
-      vector_store_id: vectorStoreId,
       chatId: discordThread.id,
       platformUserId: discordUserId,
       message: userMessage,

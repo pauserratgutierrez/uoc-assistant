@@ -14,9 +14,8 @@ export class AssistantController {
 
   chatResponse = async (req, res) => {
     try {
-      const { vector_store_id, chatId, platformUserId, platform, message } = req.body
+      const { chatId, platformUserId, platform, message } = req.body
       const { response_text } = await this.assistantModel.chatResponse({
-        vector_store_id,
         chatId,
         platformUserId,
         platform,

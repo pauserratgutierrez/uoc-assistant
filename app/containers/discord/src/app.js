@@ -14,7 +14,6 @@ const { CORPORATIVE: colorCorp, MASTERBRAND: colorBrand } = CONFIG.COLORS
 
 let assistantChannelId = null
 let assistantManagerRoleId = null
-let vectorStoreId = null
 
 // API
 const APIInstance = new APIClient()
@@ -31,9 +30,10 @@ const client = new Client({
 client.once(Events.ClientReady, async (readyClient) => {
   const { username, id } = readyClient.user
 
-  const result = await APIInstance.setupDataset()
-  vectorStoreId = result.vectorStoreId
-  console.log(`Dataset setup completed with vector store ID: ${vectorStoreId}`)
+  // This should be a command to run whenever the admin wants to check for updates
+  // const result = await APIInstance.setupDataset()
+  // vectorStoreId = result.vectorStoreId
+  // console.log(`Dataset setup completed with vector store ID: ${vectorStoreId}`)
 
   // The channel or role could be stored in the DB but deleted in Discord. Check if the ids are still valid!
   const discordConfigIds = await APIInstance.getDiscordConfigIds()
@@ -80,7 +80,7 @@ client.on(Events.MessageCreate, async (message) => {
   if (message.channel.isThread() && parentId === assistantChannelId && ownerId === client.user.id) {
     if (message.channel.locked) return await message.delete()
 
-    await processMessage(message.channel, message.author.id, APIInstance, vectorStoreId, message.content, message.attachments, colorBrand, assistantFooter)
+    await processMessage(message.channel, message.author.id, APIInstance, message.content, message.attachments, colorBrand, assistantFooter)
   }
 })
 
@@ -93,7 +93,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (interaction.isModalSubmit()) {
-    if (id === 'modal_chat_new') await modalChatNew(interaction, APIInstance, vectorStoreId, assistantFooter, colorBrand)
+    if (id === 'modal_chat_new') await modalChatNew(interaction, APIInstance, assistantFooter, colorBrand)
   }
 })
 

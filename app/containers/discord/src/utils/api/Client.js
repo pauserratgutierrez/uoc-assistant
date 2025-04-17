@@ -22,14 +22,13 @@ export class APIClient {
     }
   }
 
-  async chatResponse({ vector_store_id, chatId, platformUserId, message }) {
+  async chatResponse({ chatId, platformUserId, message }) {
     try {
       const url = `${this.API_URL_BASE}${this.ASSISTANT_ENDPOINT}/chat`
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          vector_store_id,
           chatId,
           platformUserId,
           platform: 'discord',

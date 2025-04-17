@@ -3,12 +3,14 @@ import { GHContent, GHMetadata } from '../utils/github/utils.js'
 
 export class AssistantModel {
   #db
+  #vectorStoreId
 
   constructor({ db, openai, vectorStoreParams, dataset }) {
     this.#db = db
     this.openai = openai
     this.vectorStoreParams = vectorStoreParams
     this.dataset = dataset
+    this.#vectorStoreId = null
   }
 
   async setupDataset() {
@@ -143,13 +145,15 @@ export class AssistantModel {
       }
 
       console.log('Dataset setup complete.')
-      return { vectorStoreId: vectorStore.id }
+
+      this.#vectorStoreId = vectorStore.id
+      return { vectorStoreId: this.#vectorStoreId }
     } catch (error) {
       console.error('Error in setupDataset:', error)
     }
   }
 
-  async chatResponse({ vector_store_id, chatId, platformUserId, platform, message }) {
+  async chatResponse({ chatId, platformUserId, platform, message }) {
     try {
       // Check for an existing user
       const userPlatform = await this.#db.findOne('users_platforms',
@@ -190,7 +194,7 @@ export class AssistantModel {
         tool_choice: { type: 'file_search' },
         tools: [{
           type: 'file_search',
-          vector_store_ids: [vector_store_id],
+          vector_store_ids: [this.#vectorStoreId],
           max_num_results: 6,
           ranking_options: { ranker: 'auto', score_threshold: 0.6 }
         }],

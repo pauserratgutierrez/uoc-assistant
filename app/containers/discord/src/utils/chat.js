@@ -22,7 +22,7 @@ export async function buttonChatNew(interaction) {
   }
 }
 
-export async function modalChatNew(interaction, APIInstance, vectorStoreId, assistantFooter, color) {
+export async function modalChatNew(interaction, APIInstance, assistantFooter, color) {
   try {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral })
 
@@ -45,7 +45,7 @@ export async function modalChatNew(interaction, APIInstance, vectorStoreId, assi
 
     await interaction.editReply({ content: `✨ Our chat is ready!\n🔗 Join me here: ${discordThread.url}.` })
 
-    await processMessage(discordThread, interaction.user.id, APIInstance, vectorStoreId, question, [], color, assistantFooter)
+    await processMessage(discordThread, interaction.user.id, APIInstance, question, [], color, assistantFooter)
   } catch (error) {
     console.log('Failed to create new chat:', error)
     try {
