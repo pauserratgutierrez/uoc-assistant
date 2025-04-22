@@ -45,7 +45,7 @@ client.once(Events.ClientReady, async (readyClient) => {
   if (!assistantChannelId) {
     console.log(`Creating a channel for the AI Assistant...`)
     const channel = await guild.channels.create({
-      name: '✨ai-agent',
+      name: '✨ia-agent-uoc',
       type: 0,
       topic: 'Ask questions about UOC and get AI-powered assistance',
       permissionOverwrites: [

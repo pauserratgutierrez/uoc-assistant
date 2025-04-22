@@ -1,6 +1,6 @@
 # mysql
 
-FROM mysql:8.4.4
+FROM mysql:8.4.5
 
 COPY my.cnf /etc/mysql/conf.d/my.cnf
 RUN chmod 644 /etc/mysql/conf.d/my.cnf

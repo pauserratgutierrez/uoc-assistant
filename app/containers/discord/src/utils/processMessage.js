@@ -6,24 +6,28 @@ export async function processMessage(discordThread, discordUserId, APIInstance, 
   try {
     await discordThread.setLocked(true)
 
-    const content = []
-
-    if (userMessage && userMessage.trim()) {
-      content.push({ type: 'text', text: userMessage.trim() })
-    }
+    let input
 
     if (discordAttachments.length > 0) {
-      if (!userMessage || !userMessage.trim()) {
-        content.push({ type: 'text', text: 'Attachment(s):' })
+      // Image or image+text: use array/object format
+      const contentArr = []
+      if (userMessage && userMessage.trim()) {
+        contentArr.push({ type: 'input_text', text: userMessage.trim() })
       }
-
       discordAttachments.forEach(a => {
-        content.push({ type: 'image_url', image_url: { url: a.url } })
+        contentArr.push({ type: 'input_image', image_url: a.url })
       })
-    }
-
-    if (content.length === 0) {
-      content.push({ type: 'text', text: 'No message content provided.' })
+      input = [
+        {
+          role: 'user',
+          content: contentArr
+        }
+      ]
+    } else {
+      // Text only: send as string
+      input = userMessage && userMessage.trim()
+        ? userMessage.trim()
+        : 'No message content provided.'
     }
 
     await discordThread.sendTyping()
@@ -32,7 +36,8 @@ export async function processMessage(discordThread, discordUserId, APIInstance, 
     const responseData = await APIInstance.chatResponse({
       chatId: discordThread.id,
       platformUserId: discordUserId,
-      message: userMessage,
+      // message: userMessage,
+      content: input
     })
     const { response_text } = responseData
 
@@ -42,7 +47,7 @@ export async function processMessage(discordThread, discordUserId, APIInstance, 
       .setFooter({ text: assistantFooter, iconURL: discordThread.client.user.displayAvatarURL() })
     const closeButton = new ButtonBuilder()
       .setCustomId('button_chat_end')
-      .setLabel('🔒 End Our Chat')
+      .setLabel('🔒 Finalitzar Xat')
       .setStyle(ButtonStyle.Danger)
     const actionRow = new ActionRowBuilder().addComponents(closeButton)
     await discordThread.send({ embeds: [embed], components: [actionRow] })

@@ -14,27 +14,28 @@ export async function assistantChannelSetup(client, channelId, assistantName, as
     }
 
     const embed = new EmbedBuilder()
-      .setTitle(assistantName)
+      .setTitle('Hola 👋!')
       .setDescription(
-`Hi 👋, I’m <@${client.user.id}> and I’m here to help us have a great conversation. Please read the text below to get the best experience while chatting with me.
+`Sóc <@${client.user.id}>, una IA que t'ajudarà amb els dubtes que tinguis de la UOC. Segueix llegint per obtenir la millor experiència mentre xateges amb mi.
 
-**Guidelines**:
-- 🔒 Let's avoid sharing sensitive data.
-- 👁️ Conversations might be monitored by Staff if necessary.
-- 💬 Our chats are private (by default) between us.
+**Normes**:
+- 🚫 No comparteixis informació confidencial o sensible.
+- 👁️ Els administradors poden revisar les converses si és necessari.
+- 💬 Per defecte, les converses són privades entre nosaltres.
 
-**My Knowledge Sources**:
-- [UOC](https://uoc.edu)
+**Fonts de coneixement**:
+- [Web UOC](https://uoc.edu)
 
-**Additional Information**:
-- 👥 Invite others to join our conversation by tagging them.
-- 📑 Once our chat is closed it becomes read-only.
+**Informació addicional**:
+- 👥 Convida altres persones a unir-se a la nostra conversa mencionant-les.
+- 📑 Un cop el nostre xat es tanqui, esdevindrà només de lectura.
+- 🧠 Descobreix més sobre mi al [Repositori de GitHub](https://github.com/pauserratgutierrez/uoc-assistant)
 
-**How to Start a New Chat**:
-1. Click the "**:sos: New Chat**" button below.
-2. Fill in the chat details.
-3. I'll create the chat for us.
-4. Join in, and let's get started!`
+**Com iniciar nous xats**:
+1. Fes clic al botó "**:sos: Nou Xat**" de sota.
+2. Omple els detalls del xat.
+3. Crearé el xat per a nosaltres.
+4. Uneix-t'hi i comencem!`
       )
       .setColor(color)
       .setFooter({ text: assistantFooter, iconURL: client.user.displayAvatarURL() })
@@ -43,7 +44,7 @@ export async function assistantChannelSetup(client, channelId, assistantName, as
       .addComponents(
         new ButtonBuilder()
           .setCustomId('button_chat_new')
-          .setLabel('New Chat')
+          .setLabel('Nou Xat')
           .setStyle(ButtonStyle.Primary)
           .setEmoji('🆘'),
         new ButtonBuilder()

@@ -22,7 +22,7 @@ export class APIClient {
     }
   }
 
-  async chatResponse({ chatId, platformUserId, message }) {
+  async chatResponse({ chatId, platformUserId, content }) {
     try {
       const url = `${this.API_URL_BASE}${this.ASSISTANT_ENDPOINT}/chat`
       const response = await fetch(url, {
@@ -32,7 +32,8 @@ export class APIClient {
           chatId,
           platformUserId,
           platform: 'discord',
-          message,
+          // message,
+          content
         }),
       })
       const body = await response.json()

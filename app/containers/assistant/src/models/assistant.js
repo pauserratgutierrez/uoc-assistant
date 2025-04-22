@@ -153,7 +153,7 @@ export class AssistantModel {
     }
   }
 
-  async chatResponse({ chatId, platformUserId, platform, message }) {
+  async chatResponse({ chatId, platformUserId, platform, content }) {
     try {
       // Check for an existing user
       const userPlatform = await this.#db.findOne('users_platforms',
@@ -227,7 +227,7 @@ Ets l’**Agent UOC**, un assistent d’Intel·ligència Artificial per a la Uni
 
 ## 6. Limitacions Institucionals
   - “No sóc una eina oficial de la UOC; m’ha creat Pau Serrat Gutiérrez per al seu TFG. Consulta el repositori a https://github.com/pauserratgutierrez/uoc-assistant.”`,
-        input: message,
+        input: content,
         store: true,
         stream: false,
         temperature: 0.3,

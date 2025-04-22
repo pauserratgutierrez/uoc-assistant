@@ -14,12 +14,12 @@ export class AssistantController {
 
   chatResponse = async (req, res) => {
     try {
-      const { chatId, platformUserId, platform, message } = req.body
+      const { chatId, platformUserId, platform, content } = req.body
       const { response_text } = await this.assistantModel.chatResponse({
         chatId,
         platformUserId,
         platform,
-        message,
+        content,
       })
 
       res.json({ data: { response_text } })

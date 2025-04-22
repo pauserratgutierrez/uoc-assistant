@@ -5,11 +5,11 @@ export async function buttonChatNew(interaction) {
   try {
     const modal = new ModalBuilder()
       .setCustomId('modal_chat_new')
-      .setTitle('Start a new Chat')
+      .setTitle('Inicia un nou xat')
 
     const questionInput = new TextInputBuilder()
       .setCustomId('modal_input_question')
-      .setLabel('How can I help you today?')
+      .setLabel('Com et puc ajudar avui?')
       .setStyle(TextInputStyle.Paragraph)
       .setRequired(true)
 
@@ -32,18 +32,18 @@ export async function modalChatNew(interaction, APIInstance, assistantFooter, co
       name: question.substring(0, 100).trim(),
       autoArchiveDuration: 10080,
       type: 12, // GUILD_PUBLIC_THREAD: 11, GUILD_PRIVATE_THREAD: 12, GUILD_NEWS_THREAD: 10
-      reason: `Assistant chat for ${interaction.user.tag}`
+      reason: `Agent chat for ${interaction.user.tag}`
     })
     await discordThread.members.add(interaction.user.id)
 
     const embed = new EmbedBuilder()
-      .setTitle('✨ Start of Our Chat')
-      .setDescription(`- 📌 **Initial Question**: \n\`\`\`${question}\`\`\``)
+      .setTitle('✨ Inici del nostre xat')
+      .setDescription(`- 📌 **Pregunta inicial**: \n\`\`\`${question}\`\`\``)
       .setColor(color)
       .setFooter({ text: assistantFooter, iconURL: interaction.client.user.displayAvatarURL() })
     await discordThread.send({ embeds: [embed] })
 
-    await interaction.editReply({ content: `✨ Our chat is ready!\n🔗 Join me here: ${discordThread.url}.` })
+    await interaction.editReply({ content: `✨ El nostre xat està llest!\n🔗 Uneix-te aquí: ${discordThread.url}.` })
 
     await processMessage(discordThread, interaction.user.id, APIInstance, question, [], color, assistantFooter)
   } catch (error) {
@@ -67,18 +67,18 @@ export async function buttonCloseChat(interaction, APIInstance, assistantFooter,
     const thread = interaction.channel
     const userId = interaction.user.id
 
-    if (thread.locked) return await interaction.editReply({ content: '🔒 The conversation is already closed.'})
+    if (thread.locked) return await interaction.editReply({ content: '🔒 La conversa ja està tancada.'})
     await thread.setLocked(true)
 
     await APIInstance.deleteChat({ chatId: thread.id, platformUserId: userId })
 
     const closeEmbed = new EmbedBuilder()
-      .setDescription(`🔒 Conversation closed by <@${userId}>.`)
+      .setDescription(`🔒 La conversa ha estat tancada per <@${userId}>.`)
       .setColor(color)
       .setFooter({ text: assistantFooter, iconURL: interaction.client.user.displayAvatarURL() })
     await thread.send({ embeds: [closeEmbed] })
 
-    await interaction.editReply({ content: '🔒 The conversation has been closed.' })
+    await interaction.editReply({ content: '🔒 La conversa ha estat tancada.' })
     await thread.setArchived(true)
   } catch (error) {
     console.log('Failed to close chat:', error)
