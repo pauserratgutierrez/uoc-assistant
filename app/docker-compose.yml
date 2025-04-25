@@ -63,7 +63,6 @@ services:
     environment:
       ASSISTANT_PORT: "${ASSISTANT_PORT}"
       DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
-      DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
       DISCORD_GUILD_ID: "${DISCORD_GUILD_ID}"
     depends_on:
       mysql:
