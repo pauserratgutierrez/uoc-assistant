@@ -9,8 +9,8 @@
   },
   "author": "Pau Serrat Gutiérrez",
   "dependencies": {
-    "express": "^4.21.2",
-    "mysql2": "^3.14.0",
-    "openai": "^4.95.1"
+    "express": "^5.1.0",
+    "mysql2": "^3.14.1",
+    "openai": "^4.96.2"
   }
 }
