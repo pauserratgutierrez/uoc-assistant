@@ -1,7 +1,7 @@
 export const CONFIG = {
   VECTOR_STORE_PARAMS: {
     chunking_strategy: { type: 'auto' },
-    expires_after: { anchor: 'last_active_at', days: 4 },
+    // expires_after: { anchor: 'last_active_at', days: 60 },
     metadata: { lookup_id: 'uoc_agent' }, // Always as first key-value pair!
     name: 'UOC Agent',
   },
