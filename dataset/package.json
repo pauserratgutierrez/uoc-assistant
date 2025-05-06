@@ -10,6 +10,6 @@
     "start": "node ."
   },
   "dependencies": {
-    "scraply": "^1.0.22"
+    "scraply": "^1.0.24"
   }
 }
