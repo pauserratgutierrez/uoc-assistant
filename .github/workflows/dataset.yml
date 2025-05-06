@@ -5,59 +5,68 @@ on:
   #   - cron: '0 0 1,8,15,22 * *' # Run at 12:00 AM UTC on the 1st, 8th, 15th, and 22nd of every month (4 times a month)
   workflow_dispatch: # Allows manual triggering from the GitHub UI
 
+concurrency:
+  group: dataset-update
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   main:
     runs-on: ubuntu-latest
 
     env:
       PROJECT_PATH: dataset
-      # NODE_CMD: node --run start
       NODE_CMD: npm run start
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4.2.2
 
-      - name: Install Chromium libraries
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            ca-certificates fonts-liberation \
-            libatk-bridge2.0-0 libatk1.0-0 libcups2 libdrm2 \
-            libgbm1 libgtk-3-0 libnspr4 libnss3 libx11-xcb1 \
-            libxcomposite1 libxdamage1 libxrandr2 libxkbcommon-x11-0 \
-            libpango-1.0-0 libasound2 xdg-utils
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1.7.3
+        id: chrome
+        with:
+          chrome-version: stable
+          install-dependencies: true
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4.3.0
         with:
-          node-version: '22.14.0'
+          node-version: '22.15.0'
           cache: 'npm'
           cache-dependency-path: ${{ env.PROJECT_PATH }}/package-lock.json
 
-      - name: Install dependencies
-        run: |
-          cd ${{ env.PROJECT_PATH }}    
-          npm ci
+      - name: Install NPM deps
+        working-directory: ${{ env.PROJECT_PATH }}
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+        run: npm ci
 
-      - name: Run Extractor
-        id: run_extractor
-        run: |
-          cd ${{ env.PROJECT_PATH }}
-          ${{ env.NODE_CMD }}
-        continue-on-error: true
+      - name: Run extractor
+        working-directory: ${{ env.PROJECT_PATH }}
+        env:
+          PUPPETEER_EXECUTABLE_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: ${{ env.NODE_CMD }}
 
-      - name: Get current date
-        id: now
-        run: echo "date=$(date +'%d-%m-%Y %H:%M:%S')" >> $GITHUB_OUTPUT
+      - name: Stamp run
+        id: stamp
+        if: success()
+        run: echo "DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
 
-      - name: Commit and push if changes
+      - name: Commit & push data if changed
+        if: success()
         run: |
-          git config --global user.name 'Scheduled Dataset Update'
-          git config --global user.email 'github-actions@github.com'
+          git config --global user.name  "Scheduled Dataset Update"
+          git config --global user.email "github-actions@github.com"
+          
           git add ${{ env.PROJECT_PATH }}/data/*
-          git diff --quiet && git diff --staged --quiet || git commit -m "Scheduled Dataset Update on ${{ steps.now.outputs.date }}"
-          git push
-permissions:
-  contents: write
-  actions: write
+
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No data changes – nothing to commit."
+          else
+            git commit -m "Dataset update – $DATE"
+            git push
+          fi
