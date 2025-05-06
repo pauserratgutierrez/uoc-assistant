@@ -45,6 +45,9 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: 'true'
         run: npm ci
 
+      - name: Debug curl
+        run: curl -I https://uoc.edu/ca
+
       - name: Run extractor
         working-directory: ${{ env.PROJECT_PATH }}
         env:
