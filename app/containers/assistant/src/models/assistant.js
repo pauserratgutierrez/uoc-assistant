@@ -63,7 +63,7 @@ export class AssistantModel {
           const fileObj = await toFile(Buffer.from(ghFileContent), name)
   
           await this.openai.vectorStores.files.del(vectorStore.id, vsFile.id)
-          await this.openai.files.del(vsFile.file_id)
+          await this.openai.files.del(vsFile.id)
           const openaiFile = await this.openai.files.create({ file: fileObj, purpose: 'user_data' })
   
           await this.openai.vectorStores.files.createAndPoll(vectorStore.id, {
@@ -88,7 +88,7 @@ export class AssistantModel {
       for (const vsFile of vsFiles) {
         if (!ghFilesMap.has(vsFile.attributes.gh_name)) {
           await this.openai.vectorStores.files.del(vectorStore.id, vsFile.id)
-          await this.openai.files.del(vsFile.file_id)
+          await this.openai.files.del(vsFile.id)
           console.log(`File Deleted: ${vsFile.attributes.gh_name}`)
         }
       }
